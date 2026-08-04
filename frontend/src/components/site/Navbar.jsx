@@ -6,7 +6,7 @@ import { IMAGES } from "../../content";
 
 const links = [
   ["/", "home"], ["/about", "about"], ["/services", "services"],
-  ["/ballast-water-testing", "testing"], ["/laboratory", "laboratory"],
+  ["/ballast-water-testing", "testing"],
   ["/standards", "standards"], ["/industries", "industries"],
   ["/faq", "faq"], ["/news", "news"], ["/contact", "contact"],
 ];

@@ -76,7 +76,14 @@ export default function Home() {
           </Reveal>
           <Reveal delay={0.1}>
             <SectionHeading label={t.who.label} title={t.who.title} />
-            <p className="mt-6 text-slate leading-relaxed text-lg">{t.who.body}</p>
+            <p className="mt-6 text-slate leading-relaxed text-lg">
+              {t.who.body.split(t.brand).map((part, i, arr) => (
+                <React.Fragment key={i}>
+                  {part}
+                  {i < arr.length - 1 && <strong className="font-bold text-navy">{t.brand}</strong>}
+                </React.Fragment>
+              ))}
+            </p>
             <Link to="/about" data-testid="home-about-link" className="mt-8 inline-flex items-center gap-2 font-semibold text-teal hover:text-cyan transition-colors">
               {t.cta.learn} <ArrowRight size={18} />
             </Link>

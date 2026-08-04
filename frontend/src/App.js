@@ -7,7 +7,6 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Services from "./pages/Services";
 import BallastWaterTesting from "./pages/BallastWaterTesting";
-import Laboratory from "./pages/Laboratory";
 import Standards from "./pages/Standards";
 import Industries from "./pages/Industries";
 import FAQ from "./pages/FAQ";
@@ -28,7 +27,6 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services />} />
           <Route path="/ballast-water-testing" element={<BallastWaterTesting />} />
-          <Route path="/laboratory" element={<Laboratory />} />
           <Route path="/standards" element={<Standards />} />
           <Route path="/industries" element={<Industries />} />
           <Route path="/faq" element={<FAQ />} />
