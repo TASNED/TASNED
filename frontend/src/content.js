@@ -31,9 +31,9 @@ const t = {
     cta: { request: "Contact Us", contact: "Our Services", learn: "Learn more", readMore: "Read more", send: "Send Message", sending: "Sending...", emergency: "Emergency Contact" },
     common: { readTime: "min read", allServices: "All Services" },
     hero: {
-      eyebrow: "Independent Marine Testing Laboratory",
-      title: "Trusted Ballast Water Testing & Marine Laboratory Services",
-      subtitle: "Independent ballast water sampling and laboratory analysis supporting compliance with international marine environmental regulations.",
+      eyebrow: "Independent Ballast Water Inspection & Testing Services",
+      title: "Trusted Ballast Water Testing for Ships",
+      subtitle: "Independent ballast water sampling and rapid, accurate analysis services supporting ship owners and operators in verifying compliance with international marine environmental regulations and standards.",
     },
     marquee: "Protecting our oceans   •   Ensuring compliance   •   Delivering solutions   •   ",
     who: {
@@ -166,9 +166,9 @@ const t = {
     cta: { request: "تواصل معنا", contact: "خدماتنا", learn: "اعرف المزيد", readMore: "اقرأ المزيد", send: "إرسال الرسالة", sending: "جارٍ الإرسال...", emergency: "اتصال طارئ" },
     common: { readTime: "دقيقة قراءة", allServices: "كل الخدمات" },
     hero: {
-      eyebrow: "مختبر بحري مستقل للفحوصات",
-      title: "خدمات موثوقة لاختبار مياه الاتزان والتحاليل المخبرية البحرية",
-      subtitle: "أخذ عينات مستقل لمياه الاتزان وتحليلها مخبرياً لدعم الامتثال للوائح البيئية البحرية الدولية.",
+      eyebrow: "خدمات مستقلة لفحص واختبار مياه الاتزان",
+      title: "اختبار موثوق لمياه الاتزان للسفن",
+      subtitle: "خدمات مستقلة لأخذ عينات مياه الاتزان وتحليلها بسرعة ودقة لدعم ملاك ومشغّلي السفن في التحقق من الامتثال للوائح والمعايير البيئية البحرية الدولية.",
     },
     marquee: "نحمي محيطاتنا   •   نضمن الامتثال   •   نقدّم الحلول   •   ",
     who: {
