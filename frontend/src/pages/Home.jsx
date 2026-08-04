@@ -44,7 +44,7 @@ function Hero() {
             className="group inline-flex items-center gap-2 rounded-full bg-cyan px-7 py-4 font-semibold text-navy hover:bg-white transition-colors">
             {t.cta.request} <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </Link>
-          <Link to="/contact" data-testid="hero-contact"
+          <Link to="/services" data-testid="hero-contact"
             className="inline-flex items-center gap-2 rounded-full border border-white/30 px-7 py-4 font-semibold text-white hover:bg-white/10 transition-colors">
             {t.cta.contact}
           </Link>

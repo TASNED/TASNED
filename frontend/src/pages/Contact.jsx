@@ -9,7 +9,7 @@ import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Button } from "../components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { MapPin, Mail, Globe, Clock, Phone, ArrowRight } from "lucide-react";
+import { MapPin, Mail, Globe, Clock, ArrowRight } from "lucide-react";
 
 const empty = { name: "", company: "", email: "", phone: "", vessel_name: "", imo_number: "", port: "", requested_service: "", preferred_date: "", message: "" };
 
@@ -83,10 +83,6 @@ export default function Contact() {
                 <li className="flex gap-3"><Globe className="text-cyan shrink-0" size={20} /><div><p className="text-white/50 text-xs uppercase tracking-wide">{t.contact.info.webTitle}</p><p>www.tasned.sa</p></div></li>
                 <li className="flex gap-3"><Clock className="text-cyan shrink-0" size={20} /><div><p className="text-white/50 text-xs uppercase tracking-wide">{t.contact.info.hoursTitle}</p><p>{t.contact.info.hours}</p></div></li>
               </ul>
-              <a href="mailto:info@tasned.sa" data-testid="emergency-contact"
-                className="mt-8 flex items-center justify-center gap-2 w-full rounded-full bg-cyan text-navy font-semibold py-3.5 hover:bg-white transition-colors">
-                <Phone size={17} /> {t.cta.emergency}
-              </a>
             </div>
             <div className="mt-6 rounded-2xl overflow-hidden shadow-soft border border-lightgray">
               <p className="px-5 py-3 text-xs font-medium text-navy bg-lightgray/40">{t.contact.info.mapTitle}</p>

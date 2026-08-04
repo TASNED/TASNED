@@ -16,7 +16,7 @@ const t = {
     brand: "TASNED INTEGRATED",
     tagline: "Integrated Marine Solutions",
     nav: { home: "Home", about: "About", services: "Services", testing: "Ballast Water Testing", laboratory: "Laboratory", standards: "Standards", industries: "Industries", faq: "FAQ", news: "News", contact: "Contact" },
-    cta: { request: "Request Inspection", contact: "Contact Us", learn: "Learn more", readMore: "Read more", send: "Send Request", sending: "Sending...", emergency: "Emergency Contact" },
+    cta: { request: "Contact Us", contact: "Our Services", learn: "Learn more", readMore: "Read more", send: "Send Message", sending: "Sending...", emergency: "Emergency Contact" },
     common: { readTime: "min read", allServices: "All Services" },
     hero: {
       eyebrow: "Independent Marine Testing Laboratory",
@@ -26,8 +26,8 @@ const t = {
     marquee: "Protecting our oceans   •   Ensuring compliance   •   Delivering solutions   •   ",
     who: {
       label: "Who We Are",
-      title: "Independent ballast water sampling and laboratory analysis",
-      body: "TASNED INTEGRATED is an independent marine testing laboratory dedicated exclusively to ballast water sampling and laboratory analysis. We support ship owners, operators and managers in verifying compliance with international ballast water regulations through accurate sampling, scientific examination and clear technical reporting. Our work is limited strictly to inspection, sampling and analysis — delivered with integrity and scientific rigour.",
+      title: "Ballast water testing and analysis for vessels",
+      body: "TASNED INTEGRATED is a specialized company providing ballast water testing and analysis services for vessels. We deliver ballast water sampling and technical examination services to support ship owners, operators, and fleet managers in meeting compliance requirements under international ballast water management regulations. Our specialized services cover the complete testing process, starting from ballast water sample collection according to established procedures, followed by technical analysis, and concluding with the preparation of clear and reliable technical reports. These services help our clients evaluate ballast water conditions and make informed decisions related to vessel operations and marine compliance. Our approach is based on a structured methodology that combines technical expertise, scientific accuracy, and a strong commitment to quality and professionalism. With our dedicated focus on ballast water testing, we aim to provide reliable inspection services that meet the needs of the maritime industry and support safe vessel operations worldwide.",
     },
     servicesSection: { label: "Our Services", title: "Focused services for ballast water compliance" },
     workflow: {
@@ -58,7 +58,7 @@ const t = {
       { label: "Compliance standards", value: 2, suffix: "", display: "D-1 / D-2" },
       { label: "Vessel types served", value: 8, suffix: "+" },
     ],
-    ctaBand: { title: "Ready to verify your vessel's compliance?", body: "Request an inspection and our specialists will arrange sampling at your port.", },
+    ctaBand: { title: "Ready to verify your vessel's compliance?", body: "Get in touch and our specialists will guide you through the ballast water testing process." },
     services: [
       { icon: "Droplets", t: "Ballast Water Sampling", d: "Collection of representative ballast water samples according to accepted international procedures." },
       { icon: "Zap", t: "Indicative Analysis", d: "Rapid onboard analysis for preliminary compliance indication." },
@@ -137,11 +137,11 @@ const t = {
     faqIntro: "Answers to common questions about ballast water sampling, laboratory analysis and compliance.",
     news: { label: "News", title: "News & Insights", empty: "No articles have been published yet. Please check back soon.", back: "Back to News" },
     contact: {
-      label: "Contact", title: "Request an Inspection",
-      intro: "Complete the form and our specialists will arrange sampling and analysis for your vessel.",
-      form: { name: "Full Name", company: "Company", email: "Email", phone: "Phone", vessel_name: "Vessel Name", imo_number: "IMO Number", port: "Port", requested_service: "Requested Service", preferred_date: "Preferred Date", message: "Message", selectService: "Select a service" },
-      info: { title: "Get in touch", hoursTitle: "Business Hours", hours: "Sunday – Thursday: 08:00 – 17:00 (AST)", addressTitle: "Location", address: "Yanbu, Kingdom of Saudi Arabia", emailTitle: "Email", email: "info@tasned.sa", webTitle: "Website", web: "www.tasned.sa", mapTitle: "Find us" },
-      success: "Your request has been received. Our team will contact you shortly.",
+      label: "Contact", title: "Contact Us",
+      intro: "Have a question or need ballast water testing for your vessel? Get in touch and our specialists will be glad to help.",
+      form: { name: "Full Name", company: "Company", email: "Email", phone: "Phone", vessel_name: "Vessel Name", imo_number: "IMO Number", port: "Port", requested_service: "Service of Interest", preferred_date: "Preferred Date", message: "Message", selectService: "Select a service" },
+      info: { title: "Get in touch", hoursTitle: "Availability", hours: "Available 24/7 — around-the-clock support.", addressTitle: "Location", address: "Yanbu, Kingdom of Saudi Arabia", emailTitle: "Email", email: "info@tasned.sa", webTitle: "Website", web: "www.tasned.sa", mapTitle: "Find us" },
+      success: "Thank you for reaching out. Our team will contact you shortly.",
       error: "Something went wrong. Please try again.",
     },
     footer: { about: "Independent ballast water sampling and laboratory analysis supporting international marine environmental compliance.", quick: "Quick Links", legal: "Legal", privacy: "Privacy Policy", terms: "Terms of Use", rights: "All rights reserved.", disclaimer: "TASNED INTEGRATED performs inspection, sampling and laboratory analysis only." },
@@ -152,7 +152,7 @@ const t = {
     brand: "تسند المتكاملة",
     tagline: "حلول بحرية متكاملة",
     nav: { home: "الرئيسية", about: "من نحن", services: "الخدمات", testing: "اختبار مياه الاتزان", laboratory: "المختبر", standards: "المعايير", industries: "القطاعات", faq: "الأسئلة الشائعة", news: "الأخبار", contact: "اتصل بنا" },
-    cta: { request: "طلب فحص", contact: "اتصل بنا", learn: "اعرف المزيد", readMore: "اقرأ المزيد", send: "إرسال الطلب", sending: "جارٍ الإرسال...", emergency: "اتصال طارئ" },
+    cta: { request: "تواصل معنا", contact: "خدماتنا", learn: "اعرف المزيد", readMore: "اقرأ المزيد", send: "إرسال الرسالة", sending: "جارٍ الإرسال...", emergency: "اتصال طارئ" },
     common: { readTime: "دقيقة قراءة", allServices: "كل الخدمات" },
     hero: {
       eyebrow: "مختبر بحري مستقل للفحوصات",
@@ -162,8 +162,8 @@ const t = {
     marquee: "نحمي محيطاتنا   •   نضمن الامتثال   •   نقدّم الحلول   •   ",
     who: {
       label: "من نحن",
-      title: "أخذ عينات مستقل وتحليل مخبري لمياه الاتزان",
-      body: "تسند المتكاملة مختبر بحري مستقل متخصص حصرياً في أخذ عينات مياه الاتزان وتحليلها مخبرياً. ندعم ملاك ومشغّلي ومديري السفن في التحقق من الامتثال للوائح مياه الاتزان الدولية عبر أخذ عينات دقيق وفحص علمي وتقارير فنية واضحة. يقتصر عملنا على الفحص وأخذ العينات والتحليل فقط، ويُنفَّذ بنزاهة ودقة علمية.",
+      title: "اختبار وتحليل مياه الاتزان للسفن",
+      body: "تسند المتكاملة شركة متخصصة تقدّم خدمات اختبار وتحليل مياه الاتزان للسفن. نوفّر خدمات أخذ عينات مياه الاتزان والفحص الفني لدعم ملاك السفن والمشغّلين ومديري الأساطيل في تلبية متطلبات الامتثال بموجب اللوائح الدولية لإدارة مياه الاتزان. تغطّي خدماتنا المتخصصة عملية الاختبار الكاملة، بدءاً من جمع عينات مياه الاتزان وفق الإجراءات المعتمدة، مروراً بالتحليل الفني، وانتهاءً بإعداد تقارير فنية واضحة وموثوقة. تساعد هذه الخدمات عملاءنا على تقييم حالة مياه الاتزان واتخاذ قرارات مدروسة تتعلق بتشغيل السفن والامتثال البحري. يستند نهجنا إلى منهجية منظَّمة تجمع بين الخبرة الفنية والدقة العلمية والالتزام القوي بالجودة والاحترافية. ومع تركيزنا المكرَّس على اختبار مياه الاتزان، نهدف إلى تقديم خدمات فحص موثوقة تلبّي احتياجات القطاع البحري وتدعم تشغيل السفن بأمان حول العالم.",
     },
     servicesSection: { label: "خدماتنا", title: "خدمات متخصصة لامتثال مياه الاتزان" },
     workflow: {
@@ -194,7 +194,7 @@ const t = {
       { label: "معايير الامتثال", value: 2, suffix: "", display: "D-1 / D-2" },
       { label: "أنواع السفن المخدومة", value: 8, suffix: "+" },
     ],
-    ctaBand: { title: "جاهز للتحقق من امتثال سفينتك؟", body: "اطلب فحصاً وسيقوم أخصائيونا بترتيب أخذ العينات في مينائك." },
+    ctaBand: { title: "جاهز للتحقق من امتثال سفينتك؟", body: "تواصل معنا وسيرشدك أخصائيونا خلال عملية اختبار مياه الاتزان." },
     services: [
       { icon: "Droplets", t: "أخذ عينات مياه الاتزان", d: "جمع عينات ممثِّلة لمياه الاتزان وفق الإجراءات الدولية المعتمدة." },
       { icon: "Zap", t: "التحليل الإرشادي", d: "تحليل سريع على متن السفينة لإعطاء مؤشر أولي للامتثال." },
@@ -273,11 +273,11 @@ const t = {
     faqIntro: "إجابات عن الأسئلة الشائعة حول أخذ عينات مياه الاتزان والتحليل المخبري والامتثال.",
     news: { label: "الأخبار", title: "الأخبار والمقالات", empty: "لم تُنشر أي مقالات بعد. يرجى العودة قريباً.", back: "العودة للأخبار" },
     contact: {
-      label: "اتصل بنا", title: "طلب فحص",
-      intro: "أكمل النموذج وسيقوم أخصائيونا بترتيب أخذ العينات والتحليل لسفينتك.",
-      form: { name: "الاسم الكامل", company: "الشركة", email: "البريد الإلكتروني", phone: "الهاتف", vessel_name: "اسم السفينة", imo_number: "رقم IMO", port: "الميناء", requested_service: "الخدمة المطلوبة", preferred_date: "التاريخ المفضل", message: "الرسالة", selectService: "اختر خدمة" },
-      info: { title: "تواصل معنا", hoursTitle: "ساعات العمل", hours: "الأحد – الخميس: 08:00 – 17:00 (توقيت السعودية)", addressTitle: "الموقع", address: "ينبع، المملكة العربية السعودية", emailTitle: "البريد", email: "info@tasned.sa", webTitle: "الموقع الإلكتروني", web: "www.tasned.sa", mapTitle: "موقعنا" },
-      success: "تم استلام طلبك. سيتواصل فريقنا معك قريباً.",
+      label: "اتصل بنا", title: "تواصل معنا",
+      intro: "لديك سؤال أو تحتاج إلى اختبار مياه الاتزان لسفينتك؟ تواصل معنا وسيسعد أخصائيونا بمساعدتك.",
+      form: { name: "الاسم الكامل", company: "الشركة", email: "البريد الإلكتروني", phone: "الهاتف", vessel_name: "اسم السفينة", imo_number: "رقم IMO", port: "الميناء", requested_service: "الخدمة محل الاهتمام", preferred_date: "التاريخ المفضل", message: "الرسالة", selectService: "اختر خدمة" },
+      info: { title: "تواصل معنا", hoursTitle: "التوفّر", hours: "متاحون على مدار الساعة 24/7.", addressTitle: "الموقع", address: "ينبع، المملكة العربية السعودية", emailTitle: "البريد", email: "info@tasned.sa", webTitle: "الموقع الإلكتروني", web: "www.tasned.sa", mapTitle: "موقعنا" },
+      success: "شكراً لتواصلك. سيتواصل معك فريقنا قريباً.",
       error: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
     },
     footer: { about: "أخذ عينات مستقل وتحليل مخبري لمياه الاتزان لدعم الامتثال البيئي البحري الدولي.", quick: "روابط سريعة", legal: "قانوني", privacy: "سياسة الخصوصية", terms: "شروط الاستخدام", rights: "جميع الحقوق محفوظة.", disclaimer: "تقوم تسند المتكاملة بالفحص وأخذ العينات والتحليل المخبري فقط." },
