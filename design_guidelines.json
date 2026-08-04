@@ -1,0 +1,99 @@
+{
+  "brand": {
+    "name": "TASNED INTEGRATED",
+    "logo_text": "TASNED",
+    "tagline": "Integrated Marine Solutions",
+    "logo_url": "https://customer-assets-m6fa6gv7.emergentagent.net/job_4348158d-9201-490e-a8bc-287cf2f0eb1b/artifacts/51gl6gni_WhatsApp%20Image%202026-08-04%20at%208.34.29%20PM%20%281%29.jpeg",
+    "promises": [
+      "Protecting our oceans. Ensuring compliance. Delivering solutions.",
+      "Integrity. Innovation. Responsibility. For oceans. For tomorrow."
+    ]
+  },
+  "theme_strategy": {
+    "mode": "light",
+    "description": "Base is pristine, clinical white (laboratory feel) with immersive deep navy sections (oceanic depth). Cyan serves as the kinetic/technical accent.",
+    "colors": {
+      "navy": "#0A1F3D",
+      "teal": "#008B95",
+      "cyan": "#00C2C7",
+      "slate": "#5B6770",
+      "light_gray": "#E6EBEF",
+      "white": "#FFFFFF"
+    }
+  },
+  "typography": {
+    "primary": "Montserrat",
+    "accent": "JetBrains Mono",
+    "rules": {
+      "h1": "text-5xl lg:text-6xl font-bold tracking-tight text-navy leading-none",
+      "h2": "text-3xl lg:text-4xl font-semibold tracking-tight text-navy",
+      "h3": "text-xl lg:text-2xl font-medium text-navy",
+      "body": "text-base text-slate leading-relaxed",
+      "label": "text-xs md:text-sm font-accent tracking-[0.2em] uppercase text-teal"
+    }
+  },
+  "spacing_and_layout": {
+    "container": "max-w-7xl mx-auto px-6 md:px-12",
+    "section_padding": "py-20 md:py-32",
+    "grid_bento": "grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8",
+    "radius": "rounded-lg",
+    "shadows": "shadow-[0_8px_30px_rgba(10,31,61,0.08)]",
+    "rtl_support": "Use logical properties (ms-, me-, ps-, pe-, text-start, text-end, border-s). Add dir='rtl' toggle logic in standard layout wrapper."
+  },
+  "motion_and_interactions": {
+    "scroll": "Use Lenis for smooth momentum scrolling.",
+    "hero_reveal": "Masked line-by-line reveal using framer-motion (initial y: 100%, opacity: 0 -> animate y: 0, opacity: 1, staggerChildren).",
+    "hover_states": "Cards lift slightly (-translate-y-1) with increased shadow. Text/Icon colors transition to Cyan.",
+    "parallax": "Use framer-motion useScroll and useTransform for subtle y-axis parallax on hero ocean background."
+  },
+  "pages_and_sections": {
+    "Home": [
+      "Kinetic Hero: Deep navy background, subtle parallax ocean texture overlay (opacity-20). Large masked typography reveal. Primary CTA.",
+      "Editorial Marquee: 'Protecting our oceans • Ensuring compliance • Delivering solutions' scrolling infinitely.",
+      "Services Bento Grid: 7 services. Light gray/white cards with hover effects.",
+      "Why Choose TASNED: Numbered manifesto chapters with JetBrains Mono numerals.",
+      "Animated Counters: Vessels inspected, Samples analyzed, Ports served."
+    ],
+    "About": ["Story, Vision/Mission, Team, Accreditations (DNV, SGS, Bureau Veritas benchmarks)."],
+    "Services": ["Detailing Ballast Water Testing, Laboratory Analysis, Marine Environmental Testing. 5-step Testing Workflow visual (Timeline style)."],
+    "Standards": ["IMO D-1/D-2, USCG compliance details. Technical tables."],
+    "Industries": ["Showcase of shipping sectors served."],
+    "FAQ": ["30+ Q&A accordion using Shadcn Accordion."],
+    "News": ["Grid of articles. Admin panel for CRUD operations."],
+    "Contact": ["Detailed inspection request form (Name, Company, Email, Phone, Vessel Name, IMO Number, Port, Requested Service, Preferred Date, Message). Google Map placeholder. Business Hours."]
+  },
+  "components": {
+    "required_shadcn": ["Accordion", "Button", "Card", "Dialog", "Form", "Input", "Select", "Textarea", "Table", "Tabs"],
+    "custom": ["LanguageToggle (EN/AR)", "Marquee (react-fast-marquee)", "KineticText (framer-motion)"]
+  },
+  "image_urls": {
+    "hero_ocean_texture": "https://images.pexels.com/photos/34155535/pexels-photo-34155535.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "ocean_surface": "https://images.pexels.com/photos/18051278/pexels-photo-18051278.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "lab_scientist": "https://images.unsplash.com/photo-1614935151651-0bea6508db6b",
+    "lab_beakers": "https://images.unsplash.com/photo-1532094349884-543bc11b234d",
+    "cargo_ship_port": "https://images.pexels.com/photos/16520011/pexels-photo-16520011.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "port_sunset": "https://images.pexels.com/photos/35458829/pexels-photo-35458829.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "microscope": "https://images.unsplash.com/photo-1614308459036-779d0dfe51ff"
+  },
+  "instructions_to_main_agent": [
+    "Install specific dependencies: framer-motion, @studio-freight/lenis (or lenis), react-fast-marquee, lucide-react.",
+    "Load Montserrat and JetBrains Mono fonts from Google Fonts.",
+    "Implement a persistent Navigation bar with EN/AR toggle. For RTL, ensure 'dir=rtl' changes the document direction and tailwind logical properties handle the rest.",
+    "DO NOT use generic purple/pink AI gradients. Stick STRICTLY to the Navy/Teal/Cyan/White palette.",
+    "Ensure the hero section uses the 'hero_ocean_texture' image with a very dark overlay (bg-navy/80 or bg-black/60) so the kinetic text is legible.",
+    "Build the 5-step Testing Workflow as a vertical or horizontal connected timeline using framer-motion for scroll-triggered line drawing.",
+    "For the Contact Form, use Shadcn Form elements and ensure all requested fields are present.",
+    "Admin Panel: Build a simple mock-CRUD interface for News under a specific route (e.g., /admin/news)."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "You tend to converge toward generic outputs. Avoid this: make creative, distinctive frontends that surprise and delight.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "You MUST NOT apply universal transition (e.g., transition: all). Add transitions for specific interactive elements excluding transforms.",
+    "You MUST NOT center align the app container. Do not add '.App { text-align: center; }'.",
+    "Always use modern button styles, matching the brand (e.g., Navy or Cyan background, white text, subtle hover lift).",
+    "Every interaction needs micro-animations - hover states, transitions. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap. Use py-24 for main sections.",
+    "All interactive and key informational elements MUST include a 'data-testid' attribute to facilitate robust automated testing.",
+    "Use 'sonner' for toasts."
+  ]
+}
