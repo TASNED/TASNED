@@ -7,7 +7,7 @@ export const IMAGES = {
   cargoPort: "https://images.pexels.com/photos/16520011/pexels-photo-16520011.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=900&w=1400",
   portSunset: "https://images.pexels.com/photos/35458829/pexels-photo-35458829.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=900&w=1400",
   microscope: "https://images.unsplash.com/photo-1614308459036-779d0dfe51ff?auto=format&fit=crop&w=1400&q=80",
-  logo: "https://customer-assets-m6fa6gv7.emergentagent.net/job_4348158d-9201-490e-a8bc-287cf2f0eb1b/artifacts/51gl6gni_WhatsApp%20Image%202026-08-04%20at%208.34.29%20PM%20%281%29.jpeg",
+  logo: "https://customer-assets-lxgj4vgw.emergentagent.net/job_marine-testing-hub/artifacts/kut7eg12_WhatsApp%20Image%202026-08-04%20at%208.34.29%20PM.jpeg",
 };
 
 const t = {
