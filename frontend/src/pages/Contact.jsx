@@ -8,10 +8,9 @@ import { toast } from "sonner";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Button } from "../components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { MapPin, Mail, Globe, Clock, ArrowRight } from "lucide-react";
 
-const empty = { name: "", company: "", email: "", phone: "", vessel_name: "", imo_number: "", port: "", requested_service: "", preferred_date: "", message: "" };
+const empty = { name: "", company: "", email: "", phone: "", message: "" };
 
 export default function Contact() {
   const { t } = useApp();
@@ -49,18 +48,6 @@ export default function Contact() {
             <form onSubmit={submit} data-testid="contact-form" className="grid sm:grid-cols-2 gap-5">
               {field("name")}{field("company")}
               {field("email", "email")}{field("phone", "tel")}
-              {field("vessel_name")}{field("imo_number")}
-              {field("port")}
-              <div>
-                <label className="block text-xs font-medium text-navy mb-1.5">{f.requested_service}</label>
-                <Select value={form.requested_service} onValueChange={(v) => setForm((p) => ({ ...p, requested_service: v }))}>
-                  <SelectTrigger data-testid="contact-service" className="bg-white border-lightgray"><SelectValue placeholder={f.selectService} /></SelectTrigger>
-                  <SelectContent>
-                    {t.services.map((s, i) => <SelectItem key={i} value={s.t}>{s.t}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              {field("preferred_date", "date")}
               <div className="sm:col-span-2">
                 <label className="block text-xs font-medium text-navy mb-1.5">{f.message}</label>
                 <Textarea rows={5} value={form.message} onChange={set("message")} data-testid="contact-message" className="bg-white border-lightgray focus-visible:ring-cyan" />
