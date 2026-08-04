@@ -1,6 +1,35 @@
 import React, { useRef, useEffect, useState } from "react";
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useInView, useScroll, useTransform } from "framer-motion";
 import Marquee from "react-fast-marquee";
+
+export const RotatingImage = ({ images, interval = 3500, className = "", alt = "" }) => {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setI((p) => (p + 1) % images.length), interval);
+    return () => clearInterval(id);
+  }, [images.length, interval]);
+  return (
+    <div className={`relative overflow-hidden ${className}`}>
+      <AnimatePresence mode="sync">
+        <motion.img
+          key={i}
+          src={images[i]}
+          alt={alt}
+          initial={{ opacity: 0, scale: 1.06 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.1, ease: "easeInOut" }}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      </AnimatePresence>
+      <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1.5 z-10">
+        {images.map((_, idx) => (
+          <span key={idx} className={`h-1.5 rounded-full transition-all ${idx === i ? "w-6 bg-cyan" : "w-1.5 bg-white/60"}`} />
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export const Reveal = ({ children, delay = 0, y = 28, className = "" }) => {
   const ref = useRef(null);

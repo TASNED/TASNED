@@ -2,13 +2,25 @@
 export const IMAGES = {
   heroOcean: "https://images.pexels.com/photos/34155535/pexels-photo-34155535.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=1200&w=1920",
   oceanSurface: "https://images.pexels.com/photos/18051278/pexels-photo-18051278.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=900&w=1400",
-  labScientist: "https://images.unsplash.com/photo-1614935151651-0bea6508db6b?auto=format&fit=crop&w=1400&q=80",
+  labScientist: "https://images.pexels.com/photos/33333666/pexels-photo-33333666/free-photo-of-massive-oil-tanker-sailing-on-open-sea.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=1400",
+  tanker1: "https://images.pexels.com/photos/33333666/pexels-photo-33333666/free-photo-of-massive-oil-tanker-sailing-on-open-sea.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=1400",
+  tanker2: "https://images.pexels.com/photos/19217421/pexels-photo-19217421/free-photo-of-oil-tanker-on-sea.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=1400",
+  tanker3: "https://images.pexels.com/photos/38646186/pexels-photo-38646186/free-photo-of-large-lng-tanker-at-sunset-in-the-ocean.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=1400",
   labBeakers: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1400&q=80",
   cargoPort: "https://images.pexels.com/photos/16520011/pexels-photo-16520011.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=900&w=1400",
   portSunset: "https://images.pexels.com/photos/35458829/pexels-photo-35458829.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=900&w=1400",
   microscope: "https://images.unsplash.com/photo-1614308459036-779d0dfe51ff?auto=format&fit=crop&w=1400&q=80",
   logo: "https://customer-assets-lxgj4vgw.emergentagent.net/job_marine-testing-hub/artifacts/kut7eg12_WhatsApp%20Image%202026-08-04%20at%208.34.29%20PM.jpeg",
 };
+
+// Rotating gallery for the "Who We Are" section — analysis + tanker vessels (names not identifiable)
+export const WHO_GALLERY = [
+  "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1400&q=80",
+  "https://images.pexels.com/photos/33333666/pexels-photo-33333666/free-photo-of-massive-oil-tanker-sailing-on-open-sea.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=1400",
+  "https://images.unsplash.com/photo-1614308459036-779d0dfe51ff?auto=format&fit=crop&w=1400&q=80",
+  "https://images.pexels.com/photos/19217421/pexels-photo-19217421/free-photo-of-oil-tanker-on-sea.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=1400",
+  "https://images.pexels.com/photos/38646186/pexels-photo-38646186/free-photo-of-large-lng-tanker-at-sunset-in-the-ocean.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=1400",
+];
 
 const t = {
   en: {
@@ -35,7 +47,7 @@ const t = {
       steps: [
         { n: "01", t: "Inspection Request", d: "You submit vessel details and the service required. We plan attendance at the agreed port." },
         { n: "02", t: "Sampling", d: "Qualified specialists collect representative ballast water samples following accepted procedures." },
-        { n: "03", t: "Laboratory Analysis", d: "Samples undergo indicative and detailed biological analysis under controlled conditions." },
+        { n: "03", t: "Onboard Rapid Screening", d: "Rapid onboard indicative analysis provides an immediate preliminary indication of compliance." },
         { n: "04", t: "Technical Report", d: "We document analytical findings in a comprehensive, traceable scientific report." },
         { n: "05", t: "Client Delivery", d: "The final report and supporting documentation are delivered to you securely." },
       ],
@@ -54,7 +66,7 @@ const t = {
       ],
     },
     counters: [
-      { label: "Regulatory frameworks", suffix: "", value: 2, display: "IMO + USCG" },
+      { label: "Regulatory framework", suffix: "", value: 1, display: "IMO" },
       { label: "Compliance standards", value: 2, suffix: "", display: "D-1 / D-2" },
       { label: "Vessel types served", value: 8, suffix: "+" },
     ],
@@ -103,7 +115,7 @@ const t = {
         { t: "Detailed Analysis", d: "Detailed laboratory analysis quantifies viable organisms across regulated size classes under controlled conditions." },
         { t: "Compliance Reporting", d: "Findings are documented in a clear, traceable technical report suitable for compliance verification." },
         { t: "Importance of Accurate Sampling", d: "Because results depend on the representativeness of the sample, disciplined sampling technique is essential to reliable outcomes." },
-        { t: "International Regulations", d: "Testing is framed by the IMO Ballast Water Management Convention and, where applicable, US Coast Guard regulations." },
+        { t: "International Regulations", d: "Testing is framed by the IMO Ballast Water Management Convention and its D-1 and D-2 standards." },
       ],
     },
     laboratory: {
@@ -127,7 +139,6 @@ const t = {
         { t: "IMO Ballast Water Management Convention", d: "The International Convention for the Control and Management of Ships' Ballast Water and Sediments establishes global requirements for managing ballast water to prevent the spread of harmful aquatic organisms." },
         { t: "D-1 Standard", d: "The ballast water exchange standard, addressing the exchange of ballast water to reduce the transfer of coastal organisms." },
         { t: "D-2 Standard", d: "The ballast water performance standard, defining limits on the concentration of viable organisms permitted in discharged ballast water." },
-        { t: "US Coast Guard Ballast Water Regulations", d: "United States requirements governing the discharge of ballast water in US waters, including applicable sampling and analysis expectations." },
         { t: "Ballast Water Sampling Guidance", d: "Recognised guidance informing representative sampling of ballast water for compliance assessment." },
         { t: "Laboratory Quality Procedures", d: "Internal quality procedures governing the integrity and traceability of laboratory analysis." },
       ],
@@ -171,7 +182,7 @@ const t = {
       steps: [
         { n: "01", t: "طلب الفحص", d: "ترسل بيانات السفينة والخدمة المطلوبة، ونخطّط للحضور في الميناء المتفق عليه." },
         { n: "02", t: "أخذ العينات", d: "يجمع أخصائيون مؤهلون عينات ممثِّلة لمياه الاتزان وفق الإجراءات المعتمدة." },
-        { n: "03", t: "التحليل المخبري", d: "تخضع العينات لتحليل إرشادي وتفصيلي بيولوجي ضمن ظروف مضبوطة." },
+        { n: "03", t: "الفحص السريع على المتن", d: "يوفّر الفحص الإرشادي السريع على متن السفينة مؤشراً أولياً فورياً للامتثال." },
         { n: "04", t: "التقرير الفني", d: "نوثّق النتائج التحليلية في تقرير علمي شامل وقابل للتتبّع." },
         { n: "05", t: "التسليم للعميل", d: "يُسلَّم التقرير النهائي والوثائق الداعمة إليك بشكل آمن." },
       ],
@@ -190,7 +201,7 @@ const t = {
       ],
     },
     counters: [
-      { label: "أطر تنظيمية", suffix: "", value: 2, display: "IMO + USCG" },
+      { label: "إطار تنظيمي", suffix: "", value: 1, display: "IMO" },
       { label: "معايير الامتثال", value: 2, suffix: "", display: "D-1 / D-2" },
       { label: "أنواع السفن المخدومة", value: 8, suffix: "+" },
     ],
@@ -239,7 +250,7 @@ const t = {
         { t: "التحليل التفصيلي", d: "يقيس التحليل المخبري التفصيلي الكائنات الحيّة عبر فئات الأحجام المنظَّمة ضمن ظروف مضبوطة." },
         { t: "تقارير الامتثال", d: "تُوثَّق النتائج في تقرير فني واضح وقابل للتتبّع مناسب للتحقق من الامتثال." },
         { t: "أهمية دقة أخذ العينات", d: "لأن النتائج تعتمد على تمثيلية العينة، فإن انضباط أسلوب أخذ العينات ضروري لموثوقية المخرجات." },
-        { t: "اللوائح الدولية", d: "يُؤطَّر الاختبار باتفاقية IMO لإدارة مياه الاتزان، وعند الاقتضاء لوائح خفر السواحل الأمريكي." },
+        { t: "اللوائح الدولية", d: "يُؤطَّر الاختبار باتفاقية IMO لإدارة مياه الاتزان ومعياريها D-1 و D-2." },
       ],
     },
     laboratory: {
@@ -263,7 +274,6 @@ const t = {
         { t: "اتفاقية IMO لإدارة مياه الاتزان", d: "الاتفاقية الدولية لضبط وإدارة مياه اتزان السفن ورواسبها تضع متطلبات عالمية لإدارة مياه الاتزان لمنع انتشار الكائنات المائية الضارة." },
         { t: "معيار D-1", d: "معيار تبادل مياه الاتزان الذي يتناول تبادل المياه لتقليل نقل الكائنات الساحلية." },
         { t: "معيار D-2", d: "معيار أداء مياه الاتزان الذي يحدد حدود تركيز الكائنات الحيّة المسموح بها في المياه المصرَّفة." },
-        { t: "لوائح خفر السواحل الأمريكي", d: "متطلبات الولايات المتحدة التي تحكم تصريف مياه الاتزان في المياه الأمريكية، بما فيها توقعات أخذ العينات والتحليل." },
         { t: "إرشادات أخذ عينات مياه الاتزان", d: "إرشادات معترف بها توجّه أخذ عينات ممثِّلة لمياه الاتزان لتقييم الامتثال." },
         { t: "إجراءات الجودة المخبرية", d: "إجراءات جودة داخلية تحكم سلامة وقابلية تتبّع التحليل المخبري." },
       ],
@@ -296,7 +306,6 @@ export const FAQS = [
   ["What is the IMO Ballast Water Management Convention?", "An international convention establishing requirements to manage ballast water and prevent the spread of harmful organisms.", "ما هي اتفاقية IMO لإدارة مياه الاتزان؟", "اتفاقية دولية تضع متطلبات لإدارة مياه الاتزان ومنع انتشار الكائنات الضارة."],
   ["What is the D-1 standard?", "The ballast water exchange standard aimed at reducing transfer of coastal organisms.", "ما هو معيار D-1؟", "معيار تبادل مياه الاتزان الذي يهدف لتقليل نقل الكائنات الساحلية."],
   ["What is the D-2 standard?", "The performance standard defining limits on viable organisms in discharged ballast water.", "ما هو معيار D-2؟", "معيار الأداء الذي يحدد حدود الكائنات الحيّة في المياه المصرَّفة."],
-  ["Do US Coast Guard regulations apply to my vessel?", "They apply to ballast water discharge in US waters; applicability depends on your trading area.", "هل تنطبق لوائح خفر السواحل الأمريكي على سفينتي؟", "تنطبق على تصريف المياه في المياه الأمريكية، ويعتمد ذلك على منطقة تشغيلك."],
   ["How is a representative sample collected?", "Using accepted sampling procedures designed to reflect the true condition of discharged ballast water.", "كيف تُجمع العينة الممثِّلة؟", "باستخدام إجراءات معتمدة مصممة لتعكس الحالة الحقيقية للمياه المصرَّفة."],
   ["Why is representative sampling important?", "Results depend on sample representativeness, so disciplined technique is essential for reliability.", "لماذا تهم تمثيلية العينة؟", "لأن النتائج تعتمد على تمثيلية العينة، فالانضباط ضروري للموثوقية."],
   ["What organisms are assessed?", "Viable organisms across the size classes addressed by the applicable standards.", "ما الكائنات التي تُقيَّم؟", "الكائنات الحيّة عبر فئات الأحجام التي تتناولها المعايير المعمول بها."],
@@ -309,14 +318,14 @@ export const FAQS = [
   ["What is chain of custody?", "The documented traceability of a sample from collection through analysis and reporting.", "ما هي سلسلة الحيازة؟", "التتبّع الموثّق للعينة من الجمع حتى التحليل والتقرير."],
   ["How are samples preserved?", "Through controlled handling and preservation to protect sample integrity before analysis.", "كيف تُحفظ العينات؟", "عبر مناولة وحفظ مضبوطين لحماية سلامة العينة قبل التحليل."],
   ["What quality controls are applied?", "Internal quality control measures are applied across the analytical workflow.", "ما ضوابط الجودة المطبَّقة؟", "تُطبَّق تدابير ضبط جودة داخلية عبر مسار التحليل."],
-  ["Which vessel types do you serve?", "Commercial shipping, tankers, bulk carriers, container ships, Ro-Ro, passenger ships, government and research vessels.", "ما أنواع السفن التي تخدمونها؟", "الشحن التجاري والناقلات وناقلات البضائع السائبة وسفن الحاويات والدحرجة والركاب والسفن الحكومية والبحثية."],
+  ["Which vessel types do you serve?", "We serve all vessel types on request.", "ما أنواع السفن التي تخدمونها؟", "نخدم جميع أنواع السفن عند الطلب."],
   ["Can you support port State control inspections?", "We provide sampling and analysis evidence that supports compliance verification.", "هل تدعمون فحوصات رقابة دولة الميناء؟", "نوفّر أدلة أخذ العينات والتحليل التي تدعم التحقق من الامتثال."],
   ["Why are invasive species a concern?", "They can disrupt native biodiversity, fisheries and marine infrastructure in receiving waters.", "لماذا تُعد الأنواع الغازية مصدر قلق؟", "لأنها قد تخل بالتنوع الحيوي والمصايد والبنية البحرية في المياه المستقبِلة."],
   ["Do you offer onboard indicative testing?", "Yes, rapid indicative analysis can be performed onboard for a preliminary indication.", "هل تقدّمون اختباراً إرشادياً على المتن؟", "نعم، يمكن إجراء تحليل إرشادي سريع على المتن لإعطاء مؤشر أولي."],
   ["Where is TASNED based?", "TASNED INTEGRATED is based in Yanbu, Kingdom of Saudi Arabia.", "أين تقع تسند؟", "تقع تسند المتكاملة في ينبع، المملكة العربية السعودية."],
-  ["How do I request an inspection?", "Complete the contact form with your vessel details and requested service.", "كيف أطلب فحصاً؟", "أكمل نموذج الاتصال ببيانات سفينتك والخدمة المطلوبة."],
+  ["How do I request an inspection?", "Complete the contact form, and our team will get back to you promptly.", "كيف أطلب فحصاً؟", "أكمل نموذج التواصل، وسيعاود فريقنا التواصل معك في أقرب وقت."],
   ["Is data kept confidential?", "Client information and results are handled with professional confidentiality.", "هل تُحفظ البيانات بسرية؟", "تُعامل معلومات العملاء والنتائج بسرية مهنية."],
-  ["What standards do you test against?", "The IMO Ballast Water Management Convention (D-1/D-2) and, where applicable, US Coast Guard regulations.", "ما المعايير التي تختبرون وفقها؟", "اتفاقية IMO لإدارة مياه الاتزان (D-1/D-2) وعند الاقتضاء لوائح خفر السواحل الأمريكي."],
+  ["What standards do you test against?", "The IMO Ballast Water Management Convention, including the D-1 and D-2 standards.", "ما المعايير التي تختبرون وفقها؟", "اتفاقية IMO لإدارة مياه الاتزان، بما في ذلك معياري D-1 و D-2."],
   ["Do results guarantee compliance?", "We provide objective analytical evidence; compliance determination rests with the relevant authorities.", "هل تضمن النتائج الامتثال؟", "نقدّم أدلة تحليلية موضوعية، ويعود قرار الامتثال للجهات المختصة."],
   ["How are results validated?", "Analytical data is reviewed and validated before it is included in the final report.", "كيف يتم التحقق من النتائج؟", "تُراجَع البيانات التحليلية ويُتحقَّق منها قبل إدراجها في التقرير النهائي."],
 ];

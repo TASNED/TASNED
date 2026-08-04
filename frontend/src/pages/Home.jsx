@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Layout from "../components/site/Layout";
-import { Reveal, Eyebrow, SectionHeading, BrandMarquee, Counter, PageHero } from "../components/site/Shared";
+import { Reveal, Eyebrow, SectionHeading, BrandMarquee, Counter, PageHero, RotatingImage } from "../components/site/Shared";
 import Icon from "../lib/icons";
 import { useApp } from "../context/AppContext";
-import { IMAGES } from "../content";
+import { IMAGES, WHO_GALLERY } from "../content";
 
 const line = { hidden: { y: "110%" }, show: (i) => ({ y: "0%", transition: { duration: 0.9, delay: 0.15 + i * 0.12, ease: [0.22, 1, 0.36, 1] } }) };
 
@@ -66,9 +66,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 md:px-12 grid lg:grid-cols-2 gap-14 items-center">
           <Reveal>
             <div className="relative">
-              <img src={IMAGES.labScientist} alt="Marine laboratory scientist" className="rounded-2xl shadow-lift w-full object-cover aspect-[4/5]" />
-              <div className="absolute -bottom-6 -right-4 md:-right-8 bg-navy text-white rounded-2xl p-6 shadow-lift max-w-[220px]">
-                <p className="font-mono text-cyan text-sm">IMO • USCG</p>
+              <RotatingImage images={WHO_GALLERY} alt="Ballast water analysis and vessels served"
+                className="rounded-2xl shadow-lift w-full aspect-[4/5]" />
+              <div className="absolute -bottom-6 -right-4 md:-right-8 bg-navy text-white rounded-2xl p-6 shadow-lift max-w-[220px] z-20">
+                <p className="font-mono text-cyan text-sm">IMO</p>
                 <p className="mt-1 text-sm text-white/80">{t.hero.eyebrow}</p>
               </div>
             </div>
