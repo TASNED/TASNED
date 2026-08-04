@@ -1,55 +1,47 @@
-import { useEffect } from "react";
+import React from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
-import { HOME } from "@/constants/testIds";
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          data-testid={HOME.emergentLink}
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+import { Toaster } from "sonner";
+import { AppProvider } from "./context/AppContext";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Services from "./pages/Services";
+import BallastWaterTesting from "./pages/BallastWaterTesting";
+import Laboratory from "./pages/Laboratory";
+import Standards from "./pages/Standards";
+import Industries from "./pages/Industries";
+import FAQ from "./pages/FAQ";
+import News from "./pages/News";
+import NewsArticle from "./pages/NewsArticle";
+import Contact from "./pages/Contact";
+import Legal from "./pages/Legal";
+import AdminLogin from "./pages/AdminLogin";
+import AdminNews from "./pages/AdminNews";
 
 function App() {
   return (
-    <div className="App">
+    <AppProvider>
       <BrowserRouter>
+        <Toaster position="top-center" richColors />
         <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/ballast-water-testing" element={<BallastWaterTesting />} />
+          <Route path="/laboratory" element={<Laboratory />} />
+          <Route path="/standards" element={<Standards />} />
+          <Route path="/industries" element={<Industries />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/news/:slug" element={<NewsArticle />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy" element={<Legal kind="privacy" />} />
+          <Route path="/terms" element={<Legal kind="terms" />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/news" element={<AdminNews />} />
         </Routes>
       </BrowserRouter>
-    </div>
+    </AppProvider>
   );
 }
 
