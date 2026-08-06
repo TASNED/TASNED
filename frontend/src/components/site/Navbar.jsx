@@ -8,7 +8,7 @@ const links = [
   ["/", "home"], ["/about", "about"], ["/services", "services"],
   ["/ballast-water-testing", "testing"],
   ["/standards", "standards"], ["/industries", "industries"],
-  ["/faq", "faq"], ["/news", "news"], ["/contact", "contact"],
+  ["/faq", "faq"], ["/news", "news"], ["/careers", "careers"], ["/contact", "contact"],
 ];
 
 export default function Navbar() {

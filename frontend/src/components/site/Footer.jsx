@@ -49,6 +49,7 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
           <p>© {new Date().getFullYear()} TASNED INTEGRATED. {t.footer.rights}</p>
+          <p className="font-mono text-white/60"><span className="text-white/40 uppercase tracking-wider">{t.footer.crLabel}:</span> <span className="text-cyan">{t.footer.crNumber}</span></p>
           <div className="flex gap-6">
             <Link to="/privacy" className="hover:text-cyan">{t.footer.privacy}</Link>
             <Link to="/terms" className="hover:text-cyan">{t.footer.terms}</Link>

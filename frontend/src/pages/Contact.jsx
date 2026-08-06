@@ -74,7 +74,7 @@ export default function Contact() {
             <div className="mt-6 rounded-2xl overflow-hidden shadow-soft border border-lightgray">
               <p className="px-5 py-3 text-xs font-medium text-navy bg-lightgray/40">{t.contact.info.mapTitle}</p>
               <iframe title="map" data-testid="contact-map" className="w-full h-64 grayscale-[0.2]"
-                src="https://www.google.com/maps?q=Yanbu,Saudi Arabia&output=embed" loading="lazy" />
+                src="https://maps.google.com/maps?q=seaports%20saudi%20arabia&t=&z=5&ie=UTF8&iwloc=&output=embed" loading="lazy" />
             </div>
           </Reveal>
         </div>

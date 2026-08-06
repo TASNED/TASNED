@@ -13,6 +13,7 @@ import FAQ from "./pages/FAQ";
 import News from "./pages/News";
 import NewsArticle from "./pages/NewsArticle";
 import Contact from "./pages/Contact";
+import Careers from "./pages/Careers";
 import Legal from "./pages/Legal";
 import AdminLogin from "./pages/AdminLogin";
 import AdminNews from "./pages/AdminNews";
@@ -33,6 +34,7 @@ function App() {
           <Route path="/news" element={<News />} />
           <Route path="/news/:slug" element={<NewsArticle />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/careers" element={<Careers />} />
           <Route path="/privacy" element={<Legal kind="privacy" />} />
           <Route path="/terms" element={<Legal kind="terms" />} />
           <Route path="/admin/login" element={<AdminLogin />} />
