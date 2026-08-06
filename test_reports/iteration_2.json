@@ -1,0 +1,21 @@
+{
+  "summary": "Full backend + frontend testing of the new Careers feature, admin password rotation and Arabic hero fix. 13/13 pytest backend tests pass: existing regression (auth login/me, invalid creds, news public + auth-gated CRUD, contact submit + list) plus new tests for admin new password (12a34b56cd21) succeeding, old password (TasnedAdmin2026!) rejected 401, careers POST 200 with PDF + persisted in careers_applications, careers 422 without cv, 400 for .txt (Only PDF/DOC/DOCX), 400 for >10MB file, and 401/200 auth-gated /api/careers-applications listing. Frontend: /careers full form renders, filled required fields + attached dummy PDF via data-testid career-cv, careers-submit fires and success toast 'Your application has been received. We will contact you if a suitable opportunity arises.' appears. Admin login with new password 12a34b56cd21 reaches /admin/news. Arabic language toggle sets html[dir]=rtl and hero <h1> ('اختبار موثوق لمياه الاتزان للسفن') renders fully at height 218.375px (line-height 97.2px, font-size 72px) — Arabic descenders no longer clipped.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Careers endpoint reads full upload into memory to compute size and to base64 for email attach — acceptable up to 10 MB but note memory usage under concurrency.",
+    "Startup seed_admin remains idempotent — re-hashes admin password from env if it doesn't verify, so password rotation via .env works with just a backend restart.",
+    "Cookies: httpOnly, Secure, SameSite=None with allow_credentials=True and explicit CORS origins — correct for cross-site auth.",
+    "Careers file validation checks both extension and size after reading; consider streaming/size-limit at request level for robustness, non-blocking."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin@tasned.sa / 12a34b56cd21 (verified working; old password TasnedAdmin2026! correctly rejected)",
+  "seed_data_creation": "Created TEST_ prefixed careers_applications entries and a contact request; all cleaned up post-test (careers: 2 removed, contacts: 2 removed).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend regression suite at /app/backend/tests/backend_test.py now covers auth (incl. old-password rejection), news CRUD, contact, and full careers flow (success/missing-cv/invalid-type/too-large/auth-gated list). Reuse as-is.",
+  "rca of the issue": "N/A — no bugs found."
+}

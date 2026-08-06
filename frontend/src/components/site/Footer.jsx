@@ -1,29 +1,29 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Linkedin, Twitter, Facebook, Mail, Globe, MapPin } from "lucide-react";
+import { Linkedin, Mail, Globe, MapPin } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { IMAGES } from "../../content";
 
+const LINKEDIN_URL = "https://www.linkedin.com/company/tasnedsa/";
+
 export default function Footer() {
   const { t } = useApp();
-  const quick = [["/services", "services"], ["/industries", "industries"], ["/standards", "standards"], ["/contact", "contact"]];
+  const quick = [["/services", "services"], ["/industries", "industries"], ["/standards", "standards"], ["/careers", "careers"], ["/contact", "contact"]];
   return (
     <footer className="bg-navy text-white/70">
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16 grid gap-12 md:grid-cols-4">
         <div className="md:col-span-2">
-          <div className="flex items-center gap-3">
-            <img src={IMAGES.logo} alt="TASNED" className="h-12 w-12 object-contain rounded bg-white/5" />
-            <span className="font-bold text-lg text-white">TASNED <span className="text-cyan">INTEGRATED</span></span>
+          <div className="flex items-center gap-4">
+            <img src={IMAGES.logo} alt="TASNED" className="h-16 w-16 md:h-20 md:w-20 object-contain rounded-xl bg-white p-1" />
+            <span className="font-bold text-2xl text-white tracking-tight">TASNED <span className="text-cyan">INTEGRATED</span></span>
           </div>
           <p className="mt-5 max-w-md text-sm leading-relaxed">{t.footer.about}</p>
-          <p className="mt-4 text-xs text-cyan/80 font-mono">{t.footer.disclaimer}</p>
+          <p className="mt-4 text-base italic text-cyan/90 font-medium">{t.footer.disclaimer}</p>
           <div className="mt-6 flex gap-3">
-            {[Linkedin, Twitter, Facebook].map((Icon, i) => (
-              <a key={i} href="#" aria-label="social" data-testid={`footer-social-${i}`}
-                className="h-10 w-10 grid place-items-center rounded-full border border-white/15 hover:bg-cyan hover:text-navy hover:border-cyan transition-colors">
-                <Icon size={17} />
-              </a>
-            ))}
+            <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" data-testid="footer-linkedin"
+              className="h-11 w-11 grid place-items-center rounded-full border border-white/15 hover:bg-cyan hover:text-navy hover:border-cyan transition-colors">
+              <Linkedin size={18} />
+            </a>
           </div>
         </div>
 

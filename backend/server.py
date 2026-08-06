@@ -7,13 +7,14 @@ load_dotenv(ROOT_DIR / '.env')
 
 import logging
 import uuid
+import base64
 import jwt
 import bcrypt
 import httpx
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends, UploadFile, File, Form
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
@@ -81,15 +82,17 @@ async def get_current_user(request: Request) -> dict:
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-async def send_email(recipient: str, subject: str, html: str, reply_to: Optional[str] = None):
+async def send_email(recipient: str, subject: str, html: str, reply_to: Optional[str] = None, attachments: Optional[list] = None):
     if not EMAIL_KEY:
         logger.warning("EMERGENT_EMAIL_KEY missing; skipping email")
         return
     payload = {"to": [recipient], "subject": subject, "html": html, "from_name": EMAIL_FROM_NAME}
     if reply_to:
         payload["contact_email"] = reply_to
+    if attachments:
+        payload["attachments"] = attachments
     try:
-        async with httpx.AsyncClient(timeout=30) as c:
+        async with httpx.AsyncClient(timeout=60) as c:
             resp = await c.post(f"{EMAIL_BASE_URL}/api/v1/email/send",
                                 headers={"X-Email-Key": EMAIL_KEY}, json=payload)
         resp.raise_for_status()
@@ -236,6 +239,79 @@ async def contact(body: ContactRequest):
 @api.get("/contact-requests")
 async def list_contacts(user: dict = Depends(get_current_user)):
     docs = await db.contact_requests.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return docs
+
+
+ALLOWED_CV_TYPES = {"application/pdf", "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
+ALLOWED_CV_EXTS = {".pdf", ".doc", ".docx"}
+
+
+@api.post("/careers")
+async def careers(
+    full_name: str = Form(...),
+    mobile: str = Form(...),
+    email: str = Form(...),
+    city: str = Form(...),
+    nationality: str = Form(""),
+    current_job: str = Form(""),
+    experience: str = Form(""),
+    sector: str = Form(""),
+    qualification: str = Form(""),
+    bio: str = Form(""),
+    cv: UploadFile = File(...),
+):
+    content = await cv.read()
+    size = len(content)
+    if size == 0:
+        raise HTTPException(status_code=400, detail="CV file is empty")
+    if size > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File exceeds 10 MB")
+    ext = ("." + cv.filename.rsplit(".", 1)[-1].lower()) if "." in (cv.filename or "") else ""
+    if ext not in ALLOWED_CV_EXTS:
+        raise HTTPException(status_code=400, detail="Only PDF, DOC or DOCX files are allowed")
+
+    doc = {
+        "id": str(uuid.uuid4()),
+        "full_name": full_name, "mobile": mobile, "email": email, "city": city,
+        "nationality": nationality, "current_job": current_job, "experience": experience,
+        "sector": sector, "qualification": qualification, "bio": bio,
+        "cv_filename": cv.filename, "cv_size": size,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.careers_applications.insert_one({**doc})
+
+    rows_data = {
+        "Full Name": full_name, "Mobile": mobile, "Email": email, "City": city,
+        "Nationality": nationality, "Current Job Title": current_job,
+        "Years of Experience": experience, "Sector / Field": sector,
+        "Academic Qualification": qualification, "Bio": bio,
+    }
+    rows = "".join(
+        f"<tr><td style='padding:8px 14px;font-weight:600;color:#0A1F3D;vertical-align:top'>{k}</td>"
+        f"<td style='padding:8px 14px;color:#5B6770'>{(v or '-').replace(chr(10),'<br/>')}</td></tr>"
+        for k, v in rows_data.items())
+    html = f"""
+    <div style='font-family:Arial,sans-serif;max-width:640px;margin:auto'>
+      <div style='background:#0A1F3D;padding:24px;color:#fff'>
+        <h2 style='margin:0'>New Careers Application</h2>
+        <p style='margin:4px 0 0;color:#00C2C7'>TASNED INTEGRATED</p>
+      </div>
+      <table style='width:100%;border-collapse:collapse;background:#fff'>{rows}</table>
+      <p style='padding:12px 14px;color:#5B6770;font-size:12px'>CV attached: {cv.filename} ({size // 1024} KB)</p>
+    </div>"""
+    attach = [{"filename": cv.filename or "cv",
+               "content": base64.b64encode(content).decode("ascii"),
+               "content_type": cv.content_type or "application/octet-stream"}]
+    await send_email(OWNER_EMAIL, "New Careers Application — TASNED INTEGRATED",
+                     html, reply_to=email, attachments=attach)
+    return {"status": "success",
+            "message": "Your application has been received. We will contact you if a suitable opportunity arises."}
+
+
+@api.get("/careers-applications")
+async def list_careers(user: dict = Depends(get_current_user)):
+    docs = await db.careers_applications.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
     return docs
 
 

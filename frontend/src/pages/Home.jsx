@@ -25,9 +25,9 @@ function Hero() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
           <Eyebrow light>{t.hero.eyebrow}</Eyebrow>
         </motion.div>
-        <h1 className="mt-6 text-white font-bold tracking-tight leading-[1.02] text-4xl sm:text-5xl lg:text-7xl max-w-5xl">
+        <h1 className="mt-6 text-white font-bold tracking-tight leading-[1.1] rtl:leading-[1.35] text-4xl sm:text-5xl lg:text-7xl max-w-5xl">
           {lines.map((l, i) => (
-            <span key={i} className="block overflow-hidden">
+            <span key={i} className="block overflow-hidden pb-1 rtl:pb-3">
               <motion.span variants={line} custom={i} initial="hidden" animate="show" className="block">
                 {l}
               </motion.span>

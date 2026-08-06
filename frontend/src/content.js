@@ -70,7 +70,7 @@ const t = {
       { label: "Compliance standard", value: 1, suffix: "", display: "D-2" },
       { label: "Vessel types served", value: 8, suffix: "+" },
     ],
-    ctaBand: { title: "Ready for a trusted, long-term partnership?", body: "Get in touch and our specialized team will guide you through the ballast water testing process." },
+    ctaBand: { title: "Your trusted partner in ballast water testing.", body: "Contact our team today for accurate, reliable, and professional maritime testing services." },
     services: [
       { icon: "Droplets", t: "Ballast Water Sampling", d: "Collection of representative ballast water samples according to accepted international procedures." },
       { icon: "Zap", t: "Indicative Analysis", d: "Rapid onboard analysis for preliminary compliance indication." },
@@ -145,7 +145,27 @@ const t = {
     faqLabel: "FAQ",
     faqIntro: "Answers to common questions about ballast water sampling, laboratory analysis and compliance.",
     news: { label: "News", title: "News & Insights", empty: "No articles have been published yet. Please check back soon.", back: "Back to News" },
-    careers: { label: "Careers", title: "Join TASNED INTEGRATED", intro: "We're building a specialized team dedicated to marine environmental testing. If you're passionate about supporting safe and compliant vessel operations, we'd love to hear from you.", empty: "No open positions are listed at this time. Please send your CV to careers@tasned.sa and we will keep it on file for future opportunities.", cta: "Email your CV", emailLabel: "careers@tasned.sa" },
+    careers: {
+      label: "Careers", title: "Join TASNED INTEGRATED",
+      intro: "Apply to join our specialized team supporting safe and compliant vessel operations. Complete the form below and attach your CV.",
+      sections: { personal: "Personal Information", professional: "Professional Information", bioSection: "About You", uploadSection: "Upload CV" },
+      form: {
+        full_name: "Full Name", mobile: "Mobile Number", email: "Email",
+        city: "City / Place of Residence", nationality: "Nationality (optional)",
+        current_job: "Current Job Title", experience: "Years of Experience",
+        sector: "Sector or Field of Expertise", qualification: "Academic Qualification",
+        bio: "Brief About You",
+        bioPlaceholder: "Introduce yourself and highlight your experience and skills (up to ~300 words).",
+        cv: "CV / Resume", cvHint: "Accepted: PDF, DOC, DOCX — Max size: 10 MB",
+        chooseFile: "Choose file", noFile: "No file selected",
+        submit: "Send Application", sending: "Sending...",
+        success: "Your application has been received. We will contact you if a suitable opportunity arises.",
+        error: "Something went wrong. Please try again.",
+        cvRequired: "Please attach your CV.",
+        tooLarge: "File exceeds 10 MB.",
+        invalidType: "Only PDF, DOC or DOCX files are allowed.",
+      },
+    },
     contact: {
       label: "Contact", title: "Contact Us",
       intro: "Have a question or need ballast water testing for your vessel? Get in touch and our specialized team will be glad to help.",
@@ -154,7 +174,7 @@ const t = {
       success: "Thank you for reaching out. Our team will contact you shortly.",
       error: "Something went wrong. Please try again.",
     },
-    footer: { about: "Independent ballast water sampling and inspection services supporting international marine environmental compliance.", quick: "Quick Links", legal: "Legal", privacy: "Privacy Policy", terms: "Terms of Use", rights: "All rights reserved.", disclaimer: "TASNED INTEGRATED performs inspection and ballast water sampling services only.", crLabel: "Commercial Registration", crNumber: "7053830597" },
+    footer: { about: "Independent ballast water sampling and inspection services supporting international marine environmental compliance.", quick: "Quick Links", legal: "Legal", privacy: "Privacy Policy", terms: "Terms of Use", rights: "All rights reserved.", disclaimer: "TASNED INTEGRATED — Precision in testing, confidence in results.", crLabel: "Commercial Registration", crNumber: "7053830597" },
     admin: { login: "Admin Login", email: "Email", password: "Password", signIn: "Sign In", dashboard: "News Dashboard", new: "New Article", edit: "Edit", delete: "Delete", save: "Save", cancel: "Cancel", logout: "Logout", requests: "Inspection Requests" },
   },
   ar: {
@@ -204,7 +224,7 @@ const t = {
       { label: "معيار الامتثال", value: 1, suffix: "", display: "D-2" },
       { label: "أنواع السفن المخدومة", value: 8, suffix: "+" },
     ],
-    ctaBand: { title: "جاهز لشراكة موثوقة وطويلة الأمد؟", body: "تواصل معنا وسيرشدك فريقنا المختص خلال عملية اختبار مياه الاتزان." },
+    ctaBand: { title: "شريكك الموثوق في اختبار مياه الاتزان.", body: "تواصل مع فريقنا اليوم لخدمات اختبار بحرية دقيقة وموثوقة واحترافية." },
     services: [
       { icon: "Droplets", t: "أخذ عينات مياه الاتزان", d: "جمع عينات ممثِّلة لمياه الاتزان وفق الإجراءات الدولية المعتمدة." },
       { icon: "Zap", t: "التحليل الإرشادي", d: "تحليل سريع على متن السفينة لإعطاء مؤشر أولي للامتثال." },
@@ -279,7 +299,27 @@ const t = {
     faqLabel: "الأسئلة الشائعة",
     faqIntro: "إجابات عن الأسئلة الشائعة حول أخذ عينات مياه الاتزان والتحليل المخبري والامتثال.",
     news: { label: "الأخبار", title: "الأخبار والمقالات", empty: "لم تُنشر أي مقالات بعد. يرجى العودة قريباً.", back: "العودة للأخبار" },
-    careers: { label: "التوظيف", title: "انضم إلى تسنيد المتكاملة", intro: "نبني فريقاً مختصاً في الاختبار البيئي البحري. إن كنت شغوفاً بدعم تشغيل السفن بأمان وامتثال، يسعدنا التواصل معك.", empty: "لا توجد وظائف مطروحة حالياً. يرجى إرسال سيرتك الذاتية إلى careers@tasned.sa وسنحتفظ بها للفرص المستقبلية.", cta: "أرسل سيرتك الذاتية", emailLabel: "careers@tasned.sa" },
+    careers: {
+      label: "التوظيف", title: "انضم إلى تسنيد المتكاملة",
+      intro: "قدّم طلبك للانضمام إلى فريقنا المختص الذي يدعم تشغيل السفن بأمان وامتثال. أكمل النموذج أدناه وأرفق سيرتك الذاتية.",
+      sections: { personal: "المعلومات الشخصية", professional: "المعلومات المهنية", bioSection: "نبذة عن المتقدم", uploadSection: "رفع الملفات" },
+      form: {
+        full_name: "الاسم الكامل", mobile: "رقم الجوال", email: "البريد الإلكتروني",
+        city: "المدينة / مكان الإقامة", nationality: "الجنسية (اختياري)",
+        current_job: "المسمى الوظيفي الحالي", experience: "سنوات الخبرة",
+        sector: "القطاع أو مجال الخبرة", qualification: "المؤهل العلمي",
+        bio: "نبذة مختصرة عنك",
+        bioPlaceholder: "عرّف بنفسك، وأبرز خبراتك ومهاراتك في حدود 300 كلمة.",
+        cv: "السيرة الذاتية", cvHint: "الصيغ المسموحة: PDF أو DOC أو DOCX — الحد الأقصى: 10 ميغابايت",
+        chooseFile: "اختر ملفاً", noFile: "لم يتم اختيار ملف",
+        submit: "إرسال طلب التوظيف", sending: "جارٍ الإرسال...",
+        success: "تم استلام طلبك بنجاح، وسيتم التواصل معك في حال وجود فرصة مناسبة.",
+        error: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+        cvRequired: "يرجى إرفاق سيرتك الذاتية.",
+        tooLarge: "حجم الملف يتجاوز 10 ميغابايت.",
+        invalidType: "الملفات المسموح بها هي PDF أو DOC أو DOCX فقط.",
+      },
+    },
     contact: {
       label: "اتصل بنا", title: "تواصل معنا",
       intro: "لديك سؤال أو تحتاج إلى اختبار مياه الاتزان لسفينتك؟ تواصل معنا وسيسعد فريقنا المختص بمساعدتك.",
@@ -288,7 +328,7 @@ const t = {
       success: "شكراً لتواصلك. سيتواصل معك فريقنا قريباً.",
       error: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
     },
-    footer: { about: "خدمات مستقلة لأخذ عينات وفحص مياه الاتزان لدعم الامتثال البيئي البحري الدولي.", quick: "روابط سريعة", legal: "قانوني", privacy: "سياسة الخصوصية", terms: "شروط الاستخدام", rights: "جميع الحقوق محفوظة.", disclaimer: "تقوم تسنيد المتكاملة بالفحص وأخذ عينات مياه الاتزان فقط.", crLabel: "السجل التجاري", crNumber: "7053830597" },
+    footer: { about: "خدمات مستقلة لأخذ عينات وفحص مياه الاتزان لدعم الامتثال البيئي البحري الدولي.", quick: "روابط سريعة", legal: "قانوني", privacy: "سياسة الخصوصية", terms: "شروط الاستخدام", rights: "جميع الحقوق محفوظة.", disclaimer: "تسنيد المتكاملة — دقة في الفحص، ثقة في النتائج.", crLabel: "السجل التجاري", crNumber: "7053830597" },
     admin: { login: "دخول المشرف", email: "البريد", password: "كلمة المرور", signIn: "تسجيل الدخول", dashboard: "لوحة الأخبار", new: "مقال جديد", edit: "تعديل", delete: "حذف", save: "حفظ", cancel: "إلغاء", logout: "خروج", requests: "طلبات الفحص" },
   },
 };
@@ -328,3 +368,37 @@ export const FAQS = [
 ];
 
 export default t;
+
+export const LEGAL = {
+  privacy: {
+    title: "Privacy Policy",
+    intro: "TASNED INTEGRATED respects your privacy and is committed to protecting the personal information of our clients, partners, and website visitors. This Privacy Policy explains how we collect, use, protect, and manage information provided through our website and business interactions.",
+    sections: [
+      { h: "Information We Collect", body: "We may collect information necessary to provide our services and communicate with you, including:\n• Name, company name, job title, and contact details.\n• Any information voluntarily provided through contact forms or direct communication." },
+      { h: "How We Use Your Information", body: "The information collected may be used to:\n• Respond to inquiries and service requests.\n• Provide ballast water sampling and testing services.\n• Communicate regarding scheduled activities, reports, and service updates.\n• Improve our services and customer experience." },
+      { h: "Information Protection", body: "TASNED INTEGRATED applies appropriate technical and organizational measures to protect your information from unauthorized access, loss, misuse, or disclosure." },
+      { h: "Information Sharing", body: "We do not sell, rent, or trade your personal information. Information may only be shared with trusted parties when necessary to deliver our services, comply with legal requirements, or fulfill contractual obligations." },
+      { h: "Data Retention", body: "We retain information only for as long as necessary to fulfill the purposes for which it was collected or as required by applicable laws and regulations." },
+      { h: "Your Rights", body: "You may request access, correction, or deletion of your personal information, subject to applicable legal and contractual requirements." },
+      { h: "Updates to This Policy", body: "TASNED INTEGRATED may update this Privacy Policy from time to time to reflect changes in our practices or applicable regulations. Any updates will be published on this page." },
+      { h: "Contact Us", body: "For any questions regarding this Privacy Policy or how we handle your information, please contact us through the official communication channels provided on our website." },
+    ],
+    signature: "TASNED INTEGRATED\nTrusted Maritime Services Partner",
+  },
+  terms: {
+    title: "Terms of Use",
+    intro: "Welcome to the TASNED INTEGRATED website. By accessing or using this website, you agree to comply with and be bound by these Terms of Use. Please read these terms carefully before using our website.",
+    sections: [
+      { h: "Acceptance of Terms", body: "By accessing this website, you acknowledge that you have read, understood, and agreed to these Terms of Use. If you do not agree with any part of these terms, please refrain from using this website." },
+      { h: "Website Use", body: "This website is provided for general information about TASNED INTEGRATED, our maritime services, and our ballast water sampling and testing activities.\nYou agree to use this website only for lawful purposes and in a manner that does not infringe upon the rights of others or restrict their use of the website." },
+      { h: "Services Information", body: "The information provided on this website is intended for general guidance regarding our services. TASNED INTEGRATED reserves the right to modify, update, or discontinue any information, content, or services described on this website without prior notice." },
+      { h: "Intellectual Property", body: "All content owned by TASNED INTEGRATED and used on this website, including the company name and logo, is the property of TASNED INTEGRATED or is used under appropriate rights and licenses. Unauthorized use, copying, or redistribution of any content belonging to TASNED INTEGRATED is prohibited without prior approval." },
+      { h: "Third-Party Links", body: "This website may contain links to third-party websites for additional information or convenience. TASNED INTEGRATED is not responsible for the content, privacy practices, or availability of these external websites." },
+      { h: "Limitation of Liability", body: "While TASNED INTEGRATED strives to ensure that the information provided on this website is accurate and up to date, we do not guarantee that all information is complete, error-free, or continuously available.\nWe shall not be liable for any direct or indirect loss or damage resulting from the use of this website or reliance on its content." },
+      { h: "Changes to These Terms", body: "TASNED INTEGRATED reserves the right to update or modify these Terms of Use at any time. Any changes will become effective once published on this page." },
+      { h: "Governing Law and Jurisdiction", body: "These Terms of Use shall be governed by and interpreted in accordance with the laws and regulations of the Kingdom of Saudi Arabia.\nIn the event of any dispute or claim arising from the use of this website or these Terms, the competent courts in Dammam, Kingdom of Saudi Arabia, shall have jurisdiction." },
+      { h: "Contact Us", body: "If you have any questions regarding these Terms of Use, please contact us through the official communication channels provided on our website." },
+    ],
+    signature: "TASNED INTEGRATED\nTrusted Maritime Services Partner",
+  },
+};

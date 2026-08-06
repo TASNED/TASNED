@@ -15,7 +15,8 @@ if "marine-testing-hub" not in BASE_URL:
         pass
 
 ADMIN_EMAIL = "admin@tasned.sa"
-ADMIN_PASSWORD = "TasnedAdmin2026!"
+ADMIN_PASSWORD = "12a34b56cd21"
+OLD_ADMIN_PASSWORD = "TasnedAdmin2026!"
 
 
 @pytest.fixture(scope="module")
@@ -117,3 +118,63 @@ def test_contact_submit_and_list(auth_session):
     reqs = r3.json()
     assert isinstance(reqs, list)
     assert any(x.get("email") == "test@example.com" and x.get("name") == "TEST_User" for x in reqs)
+
+
+# --- Admin new password ---
+def test_login_old_password_fails():
+    r = requests.post(f"{BASE_URL}/api/auth/login", json={"email": ADMIN_EMAIL, "password": OLD_ADMIN_PASSWORD})
+    assert r.status_code == 401, f"Old password must not work: {r.status_code} {r.text}"
+
+
+# --- Careers ---
+PDF_BYTES = b"%PDF-1.4\n%TESTPDF\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF"
+
+
+def test_careers_missing_cv():
+    r = requests.post(f"{BASE_URL}/api/careers", data={
+        "full_name": "TEST_Applicant", "mobile": "+966500000000",
+        "email": "test_applicant@example.com", "city": "Riyadh"})
+    assert r.status_code == 422
+
+
+def test_careers_invalid_type():
+    files = {"cv": ("resume.txt", b"hello", "text/plain")}
+    r = requests.post(f"{BASE_URL}/api/careers", files=files, data={
+        "full_name": "TEST_Applicant", "mobile": "+966500000000",
+        "email": "test_applicant@example.com", "city": "Riyadh"})
+    assert r.status_code == 400
+    assert "PDF" in r.json().get("detail", "")
+
+
+def test_careers_too_large():
+    big = b"%PDF-1.4\n" + b"A" * (10 * 1024 * 1024 + 10)
+    files = {"cv": ("big.pdf", big, "application/pdf")}
+    r = requests.post(f"{BASE_URL}/api/careers", files=files, data={
+        "full_name": "TEST_Applicant", "mobile": "+966500000000",
+        "email": "test_applicant@example.com", "city": "Riyadh"})
+    assert r.status_code == 400
+    assert "10 MB" in r.json().get("detail", "")
+
+
+def test_careers_success_and_list(auth_session):
+    files = {"cv": ("resume.pdf", PDF_BYTES, "application/pdf")}
+    data = {
+        "full_name": "TEST_Applicant", "mobile": "+966500000000",
+        "email": "test_applicant@example.com", "city": "Riyadh",
+        "experience": "5", "bio": "Test bio",
+    }
+    r = requests.post(f"{BASE_URL}/api/careers", files=files, data=data)
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["status"] == "success"
+    assert "application has been received" in body["message"].lower()
+
+    # Auth required
+    r2 = requests.get(f"{BASE_URL}/api/careers-applications")
+    assert r2.status_code == 401
+
+    r3 = auth_session.get(f"{BASE_URL}/api/careers-applications")
+    assert r3.status_code == 200
+    apps = r3.json()
+    assert any(a.get("email") == "test_applicant@example.com" and a.get("full_name") == "TEST_Applicant" for a in apps)
+
