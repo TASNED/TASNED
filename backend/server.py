@@ -21,7 +21,9 @@ from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depend
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 from motor.motor_asyncio import AsyncIOMotorClient
+from urllib.parse import urlparse
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from bson import ObjectId
 from PIL import Image
@@ -1003,16 +1005,31 @@ app.include_router(api)
 # --- Security headers middleware ---
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # CSRF/Origin check for state-changing admin requests
         method = request.method.upper()
         path = request.url.path
         if method in ("POST", "PUT", "PATCH", "DELETE") and path.startswith("/api/admin/"):
             origin = request.headers.get("origin") or request.headers.get("referer") or ""
-            allowed = os.environ.get("CORS_ORIGINS", "").split(",")
-            allowed = [a.strip() for a in allowed if a.strip()]
-            if origin and allowed and not any(origin.startswith(a) for a in allowed):
-                from fastapi.responses import JSONResponse
-                return JSONResponse(status_code=403, content={"detail": "CSRF: origin not allowed"})
+            if origin:
+                try:
+                    host = (urlparse(origin).hostname or "").lower()
+                except Exception:
+                    host = ""
+                allowed_hosts = set()
+                for a in os.environ.get("CORS_ORIGINS", "").split(","):
+                    a = a.strip()
+                    if a:
+                        try:
+                            h = (urlparse(a).hostname or "").lower()
+                            if h:
+                                allowed_hosts.add(h)
+                        except Exception:
+                            pass
+                suffixes = [s.strip().lower() for s in
+                            os.environ.get("CSRF_ALLOWED_SUFFIXES", ".preview.emergentagent.com,.emergentcf.cloud,.emergent.host").split(",")
+                            if s.strip()]
+                ok = bool(host) and (host in allowed_hosts or any(host.endswith(sx) for sx in suffixes))
+                if not ok:
+                    return JSONResponse(status_code=403, content={"detail": "CSRF: origin not allowed"})
         response = await call_next(request)
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
@@ -1042,7 +1059,6 @@ app.add_middleware(SlowAPIMiddleware)
 
 
 async def _rate_limit_handler(request: Request, exc: RateLimitExceeded):
-    from fastapi.responses import JSONResponse
     return JSONResponse(status_code=429, content={"detail": "Too many requests. Please slow down."})
 
 

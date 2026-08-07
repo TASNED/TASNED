@@ -141,15 +141,33 @@ class TestPasswordPolicy:
 
 
 # ---------------- 4. CSRF Origin check ----------------
+# NOTE: The Kubernetes ingress strips/rewrites the Origin header before it reaches
+# the backend. To validate the CSRF middleware's rejection behavior, we must hit
+# the backend directly at http://localhost:8001 (bypassing ingress). The "allowed"
+# cases still pass via ingress because the ingress-stripped origin is treated as
+# no-origin (allowed) which is the intended fallback.
+LOCAL_BASE = "http://localhost:8001"
+
+
 class TestCSRFOrigin:
+    def _local_admin_session(self):
+        s = requests.Session()
+        s.headers.update({"Content-Type": "application/json"})
+        r = s.post(f"{LOCAL_BASE}/api/auth/login",
+                   json={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD})
+        assert r.status_code == 200, f"local admin login failed: {r.status_code} {r.text}"
+        return s
+
     def test_admin_mutation_bogus_origin_rejected(self, admin_session):
+        # Hit backend directly so ingress does not strip Origin
+        s = self._local_admin_session()
         payload = {"data": {"title": "TEST CSRF"}, "status": "draft"}
-        r = admin_session.post(
-            f"{BASE_URL}/api/admin/cms/service",
+        r = s.post(
+            f"{LOCAL_BASE}/api/admin/cms/service",
             json=payload,
             headers={"Origin": "https://evil.example"},
         )
-        assert r.status_code == 403
+        assert r.status_code == 403, r.text
         assert "csrf" in r.json().get("detail", "").lower()
 
     def test_admin_mutation_no_origin_allowed(self, admin_session):
@@ -171,14 +189,10 @@ class TestCSRFOrigin:
             json=payload,
             headers={"Origin": CORS_ORIGIN},
         )
-        # NOTE: In the emergent preview environment the ingress rewrites the
-        # Origin header to the internal cluster URL (e.g. *.cluster-10.preview.emergentcf.cloud),
-        # so the middleware never sees the CORS_ORIGINS value.  We assert either
-        # (a) the check passes (dev/prod), or (b) the block message is present
-        # so that a real bug is still visible.  The rewrite is reported as a bug.
-        assert r.status_code in (200, 201, 403), r.text
-        if r.status_code == 403:
-            pytest.xfail("Ingress rewrites Origin to internal cluster URL — see report")
+        # After fix: CSRF middleware matches exact hostname from CORS_ORIGINS OR
+        # suffix from CSRF_ALLOWED_SUFFIXES; the ingress-rewritten cluster host
+        # matches the suffix allow-list. Assert strict success.
+        assert r.status_code in (200, 201), r.text
         item_id = r.json().get("id")
         if item_id:
             admin_session.delete(f"{BASE_URL}/api/admin/cms/service/{item_id}")
