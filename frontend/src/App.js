@@ -17,6 +17,7 @@ import Careers from "./pages/Careers";
 import Legal from "./pages/Legal";
 import AdminLogin from "./pages/AdminLogin";
 import AdminNews from "./pages/AdminNews";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
           <Route path="/terms" element={<Legal kind="terms" />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/news" element={<AdminNews />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </AppProvider>

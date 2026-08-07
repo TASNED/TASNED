@@ -109,7 +109,7 @@ export default function AdminNews() {
               <div className="grid gap-3">
                 {items.map((n, i) => (
                   <div key={n.id} data-testid={`admin-article-${i}`} className="bg-white rounded-xl p-4 flex items-center gap-4 shadow-soft">
-                    <img src={n.cover_image || IMAGES.cargoPort} alt="" className="h-14 w-20 object-cover rounded-md" />
+                    <img src={n.cover_image || IMAGES.cargoPort} alt={n.title_en || n.title_ar || "News article cover image"} className="h-14 w-20 object-cover rounded-md" />
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-navy truncate">{n.title_en}</p>
                       <p className="text-xs text-slate">{n.category} · {n.slug} {n.published ? "" : "· draft"}</p>

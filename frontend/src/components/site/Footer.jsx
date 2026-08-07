@@ -14,7 +14,9 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16 grid gap-12 md:grid-cols-4">
         <div className="md:col-span-2">
           <div className="flex items-center gap-4">
-            <img src={IMAGES.logo} alt="TASNED" className="h-16 w-16 md:h-20 md:w-20 object-contain rounded-xl bg-white p-1" />
+            <span className="h-16 w-16 md:h-20 md:w-20 rounded-xl overflow-hidden bg-white shadow-lift flex items-center justify-center">
+              <img src={IMAGES.logo} alt="TASNED" className="h-full w-full object-contain scale-[1.65] origin-center" />
+            </span>
             <span className="font-bold text-2xl text-white tracking-tight">TASNED <span className="text-cyan">INTEGRATED</span></span>
           </div>
           <p className="mt-5 max-w-md text-sm leading-relaxed">{t.footer.about}</p>

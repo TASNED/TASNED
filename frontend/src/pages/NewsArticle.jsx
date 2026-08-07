@@ -20,7 +20,7 @@ export default function NewsArticle() {
   const title = lang === "ar" && n.title_ar ? n.title_ar : n.title_en;
   const body = lang === "ar" && n.body_ar ? n.body_ar : n.body_en;
   return (
-    <Layout title={title} description={n.excerpt_en}>
+    <Layout title={title} description={n.excerpt_en} image={n.cover_image || IMAGES.oceanSurface}>
       <PageHero eyebrow={n.category} title={title} image={n.cover_image || IMAGES.oceanSurface} crumbs={[t.nav.home, t.news.label]} />
       <article className="py-20 bg-white">
         <div className="max-w-3xl mx-auto px-6 md:px-12">

@@ -103,7 +103,7 @@ export const PageHero = ({ eyebrow, title, image, crumbs }) => {
   return (
     <section ref={ref} className="relative overflow-hidden bg-navy pt-36 pb-20 md:pt-44 md:pb-28 grain">
       <motion.div style={{ y }} className="absolute inset-0 opacity-30">
-        <img src={image} alt="" className="w-full h-full object-cover" />
+        <img src={image} alt={`${title} hero background`} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-navy/70" />
       </motion.div>
       <div className="relative max-w-7xl mx-auto px-6 md:px-12">

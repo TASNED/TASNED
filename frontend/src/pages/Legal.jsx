@@ -10,7 +10,7 @@ export default function Legal({ kind }) {
   const doc = kind === "terms" ? LEGAL.terms : LEGAL.privacy;
 
   return (
-    <Layout title={doc.title}>
+    <Layout title={doc.title} description={doc.intro}>
       <PageHero eyebrow={t.footer.legal} title={doc.title} image={IMAGES.oceanSurface} crumbs={[t.nav.home, label]} />
       <section className="py-24 bg-white">
         <div className="max-w-3xl mx-auto px-6 md:px-12 text-slate leading-relaxed">

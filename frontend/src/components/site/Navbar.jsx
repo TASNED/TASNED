@@ -31,7 +31,9 @@ export default function Navbar() {
     <header className={`fixed top-0 inset-x-0 z-50 transition-colors duration-300 ${solid ? "bg-white/90 backdrop-blur-md shadow-soft" : "bg-transparent"}`}>
       <div className="max-w-7xl mx-auto px-6 md:px-12 h-24 flex items-center justify-between gap-4">
         <Link to="/" data-testid="nav-logo" className="flex items-center gap-3 shrink-0">
-          <img src={IMAGES.logo} alt="TASNED" className="h-16 w-16 object-contain rounded-lg bg-white p-1 shadow-sm" />
+          <span className="h-14 w-14 md:h-16 md:w-16 rounded-lg overflow-hidden bg-white shadow-sm ring-1 ring-navy/5 flex items-center justify-center">
+            <img src={IMAGES.logo} alt="TASNED" className="h-full w-full object-contain scale-[1.65] origin-center" />
+          </span>
           <span className={`font-bold text-xl md:text-2xl tracking-tight leading-none ${solid ? "text-navy" : "text-white"}`}>
             TASNED <span className="text-cyan font-semibold">INTEGRATED</span>
           </span>

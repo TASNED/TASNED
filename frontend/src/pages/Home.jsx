@@ -18,7 +18,7 @@ function Hero() {
   return (
     <section className="relative min-h-screen flex items-center bg-navy overflow-hidden grain">
       <div className="absolute inset-0">
-        <img src={IMAGES.heroOcean} alt="" className="w-full h-full object-cover opacity-40" />
+        <img src={IMAGES.heroOcean} alt="Ocean surface and marine operations" className="w-full h-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-navy/85 via-navy/70 to-navy" />
       </div>
       <div className="relative max-w-7xl mx-auto px-6 md:px-12 pt-32 pb-20 w-full">
@@ -57,7 +57,7 @@ function Hero() {
 export default function Home() {
   const { t } = useApp();
   return (
-    <Layout title={null}>
+    <Layout title={null} description={t.hero.subtitle}>
       <Hero />
       <BrandMarquee text={t.marquee} />
 
@@ -180,7 +180,7 @@ export default function Home() {
 
       {/* CTA band */}
       <section className="relative overflow-hidden bg-navy py-20 grain">
-        <img src={IMAGES.portSunset} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
+        <img src={IMAGES.portSunset} alt="Port sunset background" className="absolute inset-0 w-full h-full object-cover opacity-20" />
         <div className="relative max-w-4xl mx-auto px-6 text-center">
           <Reveal>
             <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight">{t.ctaBand.title}</h2>
