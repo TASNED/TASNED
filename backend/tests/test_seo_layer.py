@@ -60,13 +60,16 @@ def test_public_routes():
 
 
 # --- Schemas ---
-def test_schemas_root_has_org_and_localbusiness():
+def test_schemas_root_has_org_and_website():
     r = requests.get(f"{BASE_URL}/api/schemas", params={"route": "/"})
     assert r.status_code == 200
     schemas = r.json()
     types = [s.get("@type") for s in schemas]
     assert "Organization" in types
-    assert "LocalBusiness" in types
+    assert "WebSite" in types
+    # Organization must carry brand alternate names for TASNED / تسنيد recognition
+    org = next(s for s in schemas if s.get("@type") == "Organization")
+    assert "TASNED" in (org.get("alternateName") or [])
 
 
 def test_schemas_about_has_breadcrumb():

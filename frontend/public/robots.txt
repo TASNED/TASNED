@@ -1,6 +1,14 @@
+# robots.txt for TASNED Integrated (تسنيد)
+# https://www.tasned.sa/
+
 User-agent: *
 Allow: /
+
+# Private / non-public paths
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api/admin/
 Disallow: /api/private
+Disallow: /api/media/upload
+
 Sitemap: https://www.tasned.sa/sitemap.xml

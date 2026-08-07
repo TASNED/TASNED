@@ -1,51 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://www.tasned.sa/</loc>
+    <changefreq>weekly</changefreq>
     <priority>1.00</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.tasned.sa/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.tasned.sa/?lang=ar"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.tasned.sa/"/>
   </url>
   <url>
     <loc>https://www.tasned.sa/about</loc>
+    <changefreq>monthly</changefreq>
     <priority>0.80</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.tasned.sa/about"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.tasned.sa/about?lang=ar"/>
   </url>
   <url>
     <loc>https://www.tasned.sa/services</loc>
-    <priority>0.80</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.90</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.tasned.sa/services"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.tasned.sa/services?lang=ar"/>
   </url>
   <url>
     <loc>https://www.tasned.sa/ballast-water-testing</loc>
-    <priority>0.80</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.90</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.tasned.sa/ballast-water-testing"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.tasned.sa/ballast-water-testing?lang=ar"/>
   </url>
   <url>
     <loc>https://www.tasned.sa/standards</loc>
-    <priority>0.80</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
   </url>
   <url>
     <loc>https://www.tasned.sa/industries</loc>
-    <priority>0.80</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
   </url>
   <url>
     <loc>https://www.tasned.sa/faq</loc>
+    <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
     <loc>https://www.tasned.sa/news</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.70</priority>
   </url>
   <url>
     <loc>https://www.tasned.sa/contact</loc>
-    <priority>0.70</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
   </url>
   <url>
     <loc>https://www.tasned.sa/careers</loc>
-    <priority>0.70</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.60</priority>
   </url>
   <url>
     <loc>https://www.tasned.sa/privacy</loc>
-    <priority>0.50</priority>
+    <changefreq>yearly</changefreq>
+    <priority>0.30</priority>
   </url>
   <url>
     <loc>https://www.tasned.sa/terms</loc>
-    <priority>0.50</priority>
+    <changefreq>yearly</changefreq>
+    <priority>0.30</priority>
   </url>
 </urlset>

@@ -17,9 +17,15 @@ International corporate website for TASNED INTEGRATED, a marine laboratory speci
 ## Implemented
 - **Public site:** Home, About, Services, Ballast Water Testing, Laboratory, Standards, Industries, FAQ, News, Contact (map + form + emergency), Careers (with file upload), Privacy, Terms — all bilingual EN/AR with RTL.
 - **Enterprise CMS:** RBAC (super_admin/admin/editor), Generic content managers (services, faq, industries, pages…), Media Library w/ upload, Versioning, Settings Manager, Audit Logs — mounted at `/admin`.
-- **Enterprise SEO:** `/sitemap.xml`, `/robots.txt`, `/api/sitemap-images.xml`, per-page SEO overrides via CMS, JSON-LD (LocalBusiness / Organization / Service / FAQ) injected on public pages.
-- **Enterprise Security:** SlowAPI rate limiting (auth 10/min, contact 10/min, careers/reset 5/min), CSRF Origin/Referer validation on `/api/admin/*` mutations, bleach XSS sanitization for stored content, strict CSP + HSTS + XFO + XCTO + Referrer-Policy + Permissions-Policy headers, password policy + bcrypt hashing, idempotent admin seed.
-- **Modular skeleton (2026-08-07):** `/api/modules` registry endpoint; `/api/{portal,crm,erp,bookings,payments}/health` all return 200 with module metadata.
+- **Enterprise SEO (2026-08-07 update):**
+  - Pre-hydrated branded `<title>`, meta description, canonical (`https://www.tasned.sa/`), Open Graph and Twitter Card in `public/index.html`.
+  - Pre-hydrated Organization + WebSite JSON-LD with `alternateName: ["TASNED", "تسنيد"]`.
+  - Runtime `Layout.jsx`: branded per-page titles (`Page | TASNED Integrated`), canonical, hreflang en/ar/x-default, dedupe of pre-hydrated schemas after runtime fetch.
+  - Backend `/api/schemas` emits Organization + WebSite + BreadcrumbList (+ Service on /services, + FAQPage on /faq via frontend from static content).
+  - `public/sitemap.xml` (12 URLs, hreflang alternates), `public/robots.txt` (allows all public, disallows `/admin`, `/api/admin/`, `/api/private`, `/api/media/upload`).
+  - Favicon set: `favicon.ico` (multi-size), `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png` (180x180), `tasned-logo.png` (512), `og-image.png` (1200x630) — generated from the official TASNED brand mark.
+- **Enterprise Security:** SlowAPI rate limiting, CSRF Origin/Referer validation, bleach XSS sanitization, CSP + HSTS + XFO + XCTO + Referrer-Policy + Permissions-Policy headers, password policy + bcrypt hashing.
+- **Modular skeleton:** `/api/modules` registry + `/api/{portal,crm,erp,bookings,payments}/health`.
 
 ## Admin credentials
 See `/app/memory/test_credentials.md` — admin@tasned.sa / 12a34b56cd21 (super_admin).

@@ -57,15 +57,16 @@ export default function Layout({ children, title, description }) {
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
 
   useEffect(() => {
-    const brand = settings.site_name || "TASNED INTEGRATED";
-    const defaultTitle = settings.seo_title || `${brand} — Ballast Water Testing & Marine Laboratory`;
-    const defaultDesc = settings.seo_description || "Independent ballast water sampling and inspection supporting international marine environmental compliance.";
+    const brand = settings.site_name || "TASNED Integrated";
+    const defaultTitle = settings.seo_title || `TASNED | ${brand} – Maritime & Ballast Water Services`;
+    const defaultDesc = settings.seo_description || "TASNED Integrated (تسنيد) is a Saudi Arabian maritime services company specializing in independent ballast water sampling, laboratory testing and environmental compliance for ships.";
+    // Home page keeps the branded default title; other pages get "Page | Brand"
     const finalTitle = pageSeo.title || (title ? `${title} | ${brand}` : defaultTitle);
     const finalDesc = pageSeo.description || description || defaultDesc;
     document.title = finalTitle;
     ensureMeta("description", finalDesc);
-    ensureMeta("keywords", pageSeo.keywords || settings.seo_keywords || "");
-    ensureMeta("robots", pageSeo.robots || settings.robots_default || "index, follow");
+    ensureMeta("robots", pageSeo.robots || settings.robots_default || "index, follow, max-image-preview:large");
+    ensureMeta("og:site_name", brand, "property");
     ensureMeta("og:title", pageSeo.og_title || finalTitle, "property");
     ensureMeta("og:description", pageSeo.og_description || finalDesc, "property");
     ensureMeta("og:type", "website", "property");
@@ -73,21 +74,43 @@ export default function Layout({ children, title, description }) {
     ensureMeta("twitter:card", pageSeo.twitter_card || "summary_large_image");
     ensureMeta("twitter:title", pageSeo.og_title || finalTitle);
     ensureMeta("twitter:description", pageSeo.og_description || finalDesc);
-    const canBase = (settings.canonical_base || "").replace(/\/$/, "");
+    if (pageSeo.og_image || settings.og_image) ensureMeta("twitter:image", pageSeo.og_image || settings.og_image);
+    const canBase = (settings.canonical_base || "https://www.tasned.sa").replace(/\/$/, "");
+    const canPath = pathname === "/" ? "/" : pathname;
     if (pageSeo.canonical) ensureLink("canonical", pageSeo.canonical);
-    else if (canBase) ensureLink("canonical", `${canBase}${pathname === "/" ? "" : pathname}`);
+    else ensureLink("canonical", `${canBase}${canPath}`);
+    ensureMeta("og:url", pageSeo.canonical || `${canBase}${canPath}`, "property");
     if (settings.google_verification) ensureMeta("google-site-verification", settings.google_verification);
-    // hreflang
-    if (canBase) {
-      let alt = document.querySelector('link[rel="alternate"][data-lang="ar"]');
-      if (!alt) { alt = document.createElement("link"); alt.setAttribute("rel", "alternate"); alt.setAttribute("data-lang", "ar"); document.head.appendChild(alt); }
-      alt.setAttribute("hreflang", "ar"); alt.setAttribute("href", `${canBase}${pathname}?lang=ar`);
-    }
+    // hreflang — update existing static hreflang tags in place (avoid duplicates)
+    const setHreflang = (code, href) => {
+      let el = document.querySelector(`link[rel="alternate"][hreflang="${code}"]`);
+      if (!el) {
+        el = document.createElement("link");
+        el.setAttribute("rel", "alternate");
+        el.setAttribute("hreflang", code);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("href", href);
+    };
+    setHreflang("en", `${canBase}${canPath}`);
+    setHreflang("ar", `${canBase}${canPath}${canPath.includes("?") ? "&" : "?"}lang=ar`);
+    setHreflang("x-default", `${canBase}${canPath}`);
   }, [title, description, lang, pathname, settings, pageSeo]);
 
-  // Inject JSON-LD schemas
+  // Inject JSON-LD schemas (remove static pre-hydrated Organization/WebSite first
+  // so we don't emit duplicates once the richer runtime schemas arrive)
   useEffect(() => {
+    if (!schemas || schemas.length === 0) return;
     document.querySelectorAll("script[data-jsonld]").forEach((el) => el.remove());
+    // Remove any pre-hydrated Organization / WebSite from index.html — the runtime
+    // versions are the authoritative source.
+    document.querySelectorAll('script[type="application/ld+json"]').forEach((el) => {
+      try {
+        const j = JSON.parse(el.textContent || "{}");
+        const t = j["@type"];
+        if (t === "Organization" || t === "WebSite") el.remove();
+      } catch { /* ignore */ }
+    });
     schemas.forEach((s, i) => {
       const script = document.createElement("script");
       script.type = "application/ld+json";

@@ -15,6 +15,30 @@ export default function FAQ() {
   const faqs = cmsFaqs && cmsFaqs.length > 0
     ? cmsFaqs.map((it) => [it.data?.question_en || "", it.data?.answer_en || "", it.data?.question_ar || "", it.data?.answer_ar || ""])
     : FAQS;
+
+  // Emit FAQPage JSON-LD from the currently rendered Q&A set for Google rich results.
+  useEffect(() => {
+    document.querySelectorAll('script[data-jsonld-faq]').forEach((el) => el.remove());
+    const items = faqs
+      .filter((f) => f[0] && f[1])
+      .map((f) => ({
+        "@type": "Question",
+        "name": f[0],
+        "acceptedAnswer": { "@type": "Answer", "text": f[1] },
+      }));
+    if (items.length === 0) return;
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.setAttribute("data-jsonld-faq", "1");
+    script.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": items,
+    });
+    document.head.appendChild(script);
+    return () => { script.remove(); };
+  }, [faqs]);
+
   return (
     <Layout title={t.faqLabel} description={t.faqIntro}>
       <PageHero eyebrow={t.faqLabel} title={t.faqTitle} image={IMAGES.labScientist} crumbs={[t.nav.home, t.faqLabel]} />

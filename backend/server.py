@@ -830,27 +830,55 @@ def _crumbs_for(route: str, base: str):
 @api.get("/schemas")
 async def schemas_for_page(route: str = "/"):
     settings = await db.site_settings.find_one({"_id": "main"}) or {}
-    base = (settings.get("canonical_base") or os.environ.get("FRONTEND_URL", "")).rstrip("/")
-    site_name = settings.get("site_name") or "TASNED INTEGRATED"
+    base = (settings.get("canonical_base") or os.environ.get("FRONTEND_URL", "https://www.tasned.sa")).rstrip("/")
+    site_name = settings.get("site_name") or "TASNED Integrated"
+    alt_names = settings.get("brand_alt_names") or ["TASNED", "تسنيد"]
+    logo_url = settings.get("logo_url") or f"{base}/tasned-logo.png"
+    og_image = settings.get("og_image") or f"{base}/og-image.png"
+    description = settings.get("seo_description") or (
+        "TASNED Integrated (تسنيد) is a Saudi Arabian maritime services company "
+        "specializing in independent ballast water sampling, laboratory testing "
+        "and environmental compliance for ships."
+    )
+    same_as = [u for u in [settings.get("linkedin_url"), settings.get("twitter_url"),
+                           settings.get("facebook_url"), settings.get("instagram_url")] if u]
+
     schemas = []
 
-    org = {"@context": "https://schema.org", "@type": "Organization", "name": site_name,
-           "url": base or None,
-           "logo": settings.get("logo_url"),
-           "email": settings.get("contact_email"),
-           "telephone": settings.get("contact_phone"),
-           "sameAs": [settings.get("linkedin_url")] if settings.get("linkedin_url") else []}
-    schemas.append({k: v for k, v in org.items() if v})
+    # --- Organization ---
+    org = {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": site_name,
+        "alternateName": alt_names,
+        "url": f"{base}/",
+        "logo": logo_url,
+        "image": og_image,
+        "description": description,
+        "email": settings.get("contact_email") or "info@tasned.sa",
+        "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "SA",
+            "addressRegion": settings.get("contact_address_en") or "Kingdom of Saudi Arabia",
+        },
+        "areaServed": {"@type": "Country", "name": "Saudi Arabia"},
+    }
+    if settings.get("contact_phone"):
+        org["telephone"] = settings["contact_phone"]
+    if same_as:
+        org["sameAs"] = same_as
+    schemas.append(org)
 
-    lb = {"@context": "https://schema.org", "@type": "LocalBusiness", "name": site_name,
-          "address": {"@type": "PostalAddress", "addressCountry": "SA",
-                      "streetAddress": settings.get("contact_address_en") or "Kingdom of Saudi Arabia"},
-          "telephone": settings.get("contact_phone"),
-          "email": settings.get("contact_email"),
-          "url": base or None,
-          "openingHours": "Mo-Su 00:00-23:59",
-          "identifier": settings.get("commercial_registration")}
-    schemas.append({k: v for k, v in lb.items() if v})
+    # --- WebSite ---
+    schemas.append({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": site_name,
+        "alternateName": alt_names,
+        "url": f"{base}/",
+        "inLanguage": ["en", "ar"],
+        "publisher": {"@type": "Organization", "name": site_name, "url": f"{base}/"},
+    })
 
     if route == "/services":
         docs = await db.cms_items.find({"type": "service", "status": "published"}).to_list(200)
@@ -859,7 +887,7 @@ async def schemas_for_page(route: str = "/"):
             schemas.append({"@context": "https://schema.org", "@type": "Service",
                             "name": d.get("title_en") or d.get("title_ar"),
                             "description": d.get("description_en") or d.get("description_ar"),
-                            "provider": {"@type": "Organization", "name": site_name}})
+                            "provider": {"@type": "Organization", "name": site_name, "url": f"{base}/"}})
 
     if route == "/faq":
         docs = await db.cms_items.find({"type": "faq", "status": "published"}).to_list(200)

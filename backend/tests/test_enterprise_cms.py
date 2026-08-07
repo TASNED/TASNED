@@ -263,12 +263,12 @@ def test_settings_get_public_and_update(admin):
     assert isinstance(r.json(), dict)
 
     ru = admin.put(f"{BASE_URL}/api/admin/settings",
-                   json={"ga4_measurement_id": "G-TESTING", "canonical_base": "https://tasned.sa"})
+                   json={"ga4_measurement_id": "G-TESTING", "canonical_base": "https://www.tasned.sa"})
     assert ru.status_code == 200
 
     r2 = requests.get(f"{BASE_URL}/api/settings").json()
     assert r2.get("ga4_measurement_id") == "G-TESTING"
-    assert r2.get("canonical_base") == "https://tasned.sa"
+    assert r2.get("canonical_base") == "https://www.tasned.sa"
 
 
 # =============== SEO ===============
