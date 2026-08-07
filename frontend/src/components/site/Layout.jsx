@@ -36,8 +36,15 @@ export default function Layout({ children, title, description }) {
   const { pathname } = useLocation();
   const { lang } = useApp();
   const [settings, setSettings] = useState({});
+  const [pageSeo, setPageSeo] = useState({});
+  const [schemas, setSchemas] = useState([]);
 
   useEffect(() => { fetchSettings().then(setSettings); }, []);
+
+  useEffect(() => {
+    api.get("/page-seo", { params: { route: pathname } }).then(({ data }) => setPageSeo(data || {})).catch(() => setPageSeo({}));
+    api.get("/schemas", { params: { route: pathname } }).then(({ data }) => setSchemas(data || [])).catch(() => setSchemas([]));
+  }, [pathname]);
 
   useEffect(() => {
     const lenis = new Lenis({ duration: 1.1, smoothWheel: true });
@@ -53,26 +60,52 @@ export default function Layout({ children, title, description }) {
     const brand = settings.site_name || "TASNED INTEGRATED";
     const defaultTitle = settings.seo_title || `${brand} — Ballast Water Testing & Marine Laboratory`;
     const defaultDesc = settings.seo_description || "Independent ballast water sampling and inspection supporting international marine environmental compliance.";
-    document.title = title ? `${title} | ${brand}` : defaultTitle;
-    ensureMeta("description", description || defaultDesc);
-    ensureMeta("keywords", settings.seo_keywords || "");
-    ensureMeta("robots", settings.robots_default || "index, follow");
-    // Open Graph
-    ensureMeta("og:title", title || defaultTitle, "property");
-    ensureMeta("og:description", description || defaultDesc, "property");
+    const finalTitle = pageSeo.title || (title ? `${title} | ${brand}` : defaultTitle);
+    const finalDesc = pageSeo.description || description || defaultDesc;
+    document.title = finalTitle;
+    ensureMeta("description", finalDesc);
+    ensureMeta("keywords", pageSeo.keywords || settings.seo_keywords || "");
+    ensureMeta("robots", pageSeo.robots || settings.robots_default || "index, follow");
+    ensureMeta("og:title", pageSeo.og_title || finalTitle, "property");
+    ensureMeta("og:description", pageSeo.og_description || finalDesc, "property");
     ensureMeta("og:type", "website", "property");
-    if (settings.og_image) ensureMeta("og:image", settings.og_image, "property");
-    ensureMeta("twitter:card", "summary_large_image");
-    // Canonical
-    if (settings.canonical_base) {
-      const path = pathname === "/" ? "" : pathname;
-      ensureLink("canonical", `${settings.canonical_base.replace(/\/$/, "")}${path}`);
-    }
-    // Google Search Console
+    if (pageSeo.og_image || settings.og_image) ensureMeta("og:image", pageSeo.og_image || settings.og_image, "property");
+    ensureMeta("twitter:card", pageSeo.twitter_card || "summary_large_image");
+    ensureMeta("twitter:title", pageSeo.og_title || finalTitle);
+    ensureMeta("twitter:description", pageSeo.og_description || finalDesc);
+    const canBase = (settings.canonical_base || "").replace(/\/$/, "");
+    if (pageSeo.canonical) ensureLink("canonical", pageSeo.canonical);
+    else if (canBase) ensureLink("canonical", `${canBase}${pathname === "/" ? "" : pathname}`);
     if (settings.google_verification) ensureMeta("google-site-verification", settings.google_verification);
-    // hreflang alt for language switch
-    ensureLink("alternate", null); // no-op placeholder; real hreflang added below
-  }, [title, description, lang, pathname, settings]);
+    // hreflang
+    if (canBase) {
+      let alt = document.querySelector('link[rel="alternate"][data-lang="ar"]');
+      if (!alt) { alt = document.createElement("link"); alt.setAttribute("rel", "alternate"); alt.setAttribute("data-lang", "ar"); document.head.appendChild(alt); }
+      alt.setAttribute("hreflang", "ar"); alt.setAttribute("href", `${canBase}${pathname}?lang=ar`);
+    }
+  }, [title, description, lang, pathname, settings, pageSeo]);
+
+  // Inject JSON-LD schemas
+  useEffect(() => {
+    document.querySelectorAll("script[data-jsonld]").forEach((el) => el.remove());
+    schemas.forEach((s, i) => {
+      const script = document.createElement("script");
+      script.type = "application/ld+json";
+      script.setAttribute("data-jsonld", String(i));
+      script.text = JSON.stringify(s);
+      document.head.appendChild(script);
+    });
+    if (pageSeo.jsonld_extra) {
+      try {
+        const extra = JSON.parse(pageSeo.jsonld_extra);
+        const script = document.createElement("script");
+        script.type = "application/ld+json";
+        script.setAttribute("data-jsonld", "extra");
+        script.text = JSON.stringify(extra);
+        document.head.appendChild(script);
+      } catch { /* ignore invalid JSON */ }
+    }
+  }, [schemas, pageSeo.jsonld_extra]);
 
   useEffect(() => {
     // GA4

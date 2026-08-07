@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { NavLink, Outlet, useNavigate, Link } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { IMAGES } from "../content";
-import { LayoutDashboard, Newspaper, Users, Wrench, Users2, Building2, MessageSquareQuote, HelpCircle, LayoutTemplate, Image, Settings, ClipboardList, LogOut, ExternalLink, Mail, Briefcase } from "lucide-react";
+import { LayoutDashboard, Newspaper, Users, Wrench, Users2, Building2, MessageSquareQuote, HelpCircle, LayoutTemplate, Image, Settings, ClipboardList, LogOut, ExternalLink, Mail, Briefcase, Search } from "lucide-react";
 
 const NAV = [
   { to: "/admin", end: true, icon: LayoutDashboard, label: "Dashboard", roles: ["super_admin", "admin", "editor"] },
@@ -17,6 +17,7 @@ const NAV = [
   { to: "/admin/contact-requests", icon: Mail, label: "Contact Requests", roles: ["super_admin", "admin"] },
   { to: "/admin/careers-applications", icon: Briefcase, label: "Careers", roles: ["super_admin", "admin"] },
   { to: "/admin/settings", icon: Settings, label: "Site Settings", roles: ["super_admin", "admin"] },
+  { to: "/admin/seo", icon: Search, label: "SEO Dashboard", roles: ["super_admin", "admin", "editor"] },
   { to: "/admin/users", icon: Users, label: "Users", roles: ["super_admin"] },
   { to: "/admin/audit", icon: ClipboardList, label: "Audit Log", roles: ["super_admin", "admin"] },
 ];

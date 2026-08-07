@@ -1,0 +1,30 @@
+{
+  "summary": "Enterprise SEO layer validated end-to-end. Backend: 11/11 pytest cases in /app/backend/tests/test_seo_layer.py pass — (1) GET /api/public-routes returns the 12-route list including /,/about,/services,/faq,/contact; (2) /api/schemas?route=/ contains Organization + LocalBusiness; (3) /api/schemas?route=/about contains BreadcrumbList; (4) /api/schemas?route=/services reflects a published cms/service and returns to baseline after DELETE; (5) /api/schemas?route=/faq contains FAQPage with the published question and disappears after delete; (6) /api/sitemap-images.xml is application/xml and contains xmlns:image and <urlset>; (7) /api/robots.txt contains both Sitemap: sitemap.xml and Sitemap: sitemap-images.xml lines; (8) /api/llms.txt starts with '# TASNED INTEGRATED' and includes '## Services' and 'info@tasned.sa'; (9) /api/page-seo?route=/services returns {} initially, upsert via PUT /api/admin/page-seo persists title/description/robots/og_image, DELETE restores {}; (10) /api/admin/page-seo unauth = 401; (11) RBAC: editor can PUT but DELETE returns 403 (verified with ephemeral TEST_editor_seo@tasned.sa). Frontend (Playwright, live REACT_APP_BACKEND_URL): admin login redirects to /admin; /admin/seo renders 12 rows (seo-row-/... for all public routes) and the top action bar has 4 links (Sitemap, Image Sitemap, Robots.txt, llms.txt (AI)); clicking seo-edit-/services opens the dialog, filling seo-title='E2E Services', seo-description='E2E svc desc', og_image='https://picsum.photos/1200/630' and clicking seo-save shows toast + row changes to 'custom' + shows the new title; opening public /services in a new tab and waiting 2.5s: <title>=='E2E Services', meta[name=description]=='E2E svc desc', meta[property=og:image]=='https://picsum.photos/1200/630', and script[data-jsonld=\"0\"] parses to JSON with @type='Organization'; clicking seo-clear-/services (with auto-accept confirm) resets row to 'default'; reloading public /services falls back to 'Services | TASNED INTEGRATED'. All TEST_ data (editor user, /services and /TEST_editor_route page-seo overrides, TEST_ cms service and faq items) cleaned up via fixture teardown.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_seo_layer.py",
+    "/app/test_reports/pytest/pytest_seo.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py now 973 lines — SEO endpoints (page-seo, public-routes, schemas, sitemap-images, llms.txt) push the single-file design past a healthy boundary; split into /routers/seo.py to keep <500 lines per module.",
+    "SEOManager.jsx dialog is missing DialogDescription/aria-describedby — React console warning 'Missing Description or aria-describedby={undefined} for {DialogContent}' fires each open. Add <DialogDescription> or aria-describedby='' for accessibility.",
+    "sitemap-images.xml and llms.txt have no Cache-Control headers; each request touches Mongo. Add a short-TTL cache header.",
+    "page_seo PUT does not validate that `route` is one of the known public routes — a typo (e.g. `/servces`) is silently upserted. Consider whitelisting against _PUBLIC_ROUTES or accepting arbitrary but returning a warning.",
+    "og_image, canonical, jsonld_extra accept arbitrary strings — no URL/JSON validation server-side. UI does client-side JSON.parse for jsonld_extra but backend does not; malformed JSON would still be persisted and then silently swallowed by Layout.jsx.",
+    "/api/schemas does not include the Service/FAQ items' url or image fields even though media exists in media_assets — a future enhancement.",
+    "Layout.jsx hreflang tag is set to 'ar' unconditionally without a matching 'en' alternate — SEO tools may flag it. Add both hreflangs (or self-referencing default)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_seo_layer.py",
+    "/app/test_reports/iteration_4.json"
+  ],
+  "success_rate": {"backend": "100% (11/11)", "frontend": "100% (7/7 flows)"},
+  "test_credentials": "admin@tasned.sa / 12a34b56cd21 (super_admin) — verified. Editor role verified via ephemeral TEST_editor_seo@tasned.sa (created + deleted in fixture).",
+  "seed_data_creation": "All test data cleaned up: ephemeral editor user, /services and /TEST_editor_route page_seo docs, TEST_SEO_Service cms/service and TEST_SEO_Question cms/faq items. Site returned to baseline.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "SEO layer tests live at /app/backend/tests/test_seo_layer.py (11 tests, pytest-xdist safe). Combined with existing test_enterprise_cms.py (22) and backend_test.py, total 44+ pytest cases green. The SEOManager UI uses per-row data-testids: seo-row-{route}, seo-edit-{route}, seo-clear-{route}, seo-title, seo-description, seo-keywords, seo-robots, seo-save. Layout.jsx fetches /api/page-seo and /api/schemas on route change and injects <script type='application/ld+json' data-jsonld='N'> — wait ~2.5s after navigation before asserting head tags. Note: SEOManager Dialog fires a11y warning re: missing DialogDescription — cosmetic only.",
+  "rca of the issue": "N/A — no bugs found; all 15 listed features work as specified."
+}

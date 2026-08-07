@@ -25,6 +25,7 @@ import SettingsManager from "./admin/SettingsManager";
 import UsersManager from "./admin/UsersManager";
 import AuditLog from "./admin/AuditLog";
 import RequestsView from "./admin/RequestsView";
+import SEOManager from "./admin/SEOManager";
 import AdminNews from "./pages/AdminNews";
 import NotFound from "./pages/NotFound";
 
@@ -66,6 +67,7 @@ function App() {
             <Route path="news" element={<AdminNews />} />
             <Route path="media" element={<MediaLibrary />} />
             <Route path="settings" element={<SettingsManager />} />
+            <Route path="seo" element={<SEOManager />} />
             <Route path="users" element={<UsersManager />} />
             <Route path="audit" element={<AuditLog />} />
             <Route path="contact-requests" element={<RequestsView kind="contact" />} />

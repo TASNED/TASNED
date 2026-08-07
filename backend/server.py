@@ -700,6 +700,181 @@ _PUBLIC_ROUTES = ["/", "/about", "/services", "/ballast-water-testing", "/standa
                   "/privacy", "/terms"]
 
 
+# --- Per-page SEO ---
+class PageSeoBody(BaseModel):
+    route: str
+    title: Optional[str] = ""
+    description: Optional[str] = ""
+    keywords: Optional[str] = ""
+    canonical: Optional[str] = ""
+    robots: Optional[str] = ""
+    og_image: Optional[str] = ""
+    og_title: Optional[str] = ""
+    og_description: Optional[str] = ""
+    twitter_card: Optional[str] = "summary_large_image"
+    jsonld_extra: Optional[str] = ""
+
+
+@api.get("/page-seo")
+async def get_page_seo_public(route: str):
+    doc = await db.page_seo.find_one({"route": route}, {"_id": 0})
+    return doc or {}
+
+
+@api.get("/admin/page-seo")
+async def list_page_seo(user=Depends(require_role("super_admin", "admin", "editor"))):
+    docs = await db.page_seo.find({}, {"_id": 0}).to_list(500)
+    return docs
+
+
+@api.put("/admin/page-seo")
+async def upsert_page_seo(body: PageSeoBody, request: Request,
+                          user=Depends(require_role("super_admin", "admin", "editor"))):
+    payload = body.model_dump()
+    payload["updated_at"] = datetime.now(timezone.utc).isoformat()
+    payload["updated_by"] = user.get("email")
+    await db.page_seo.update_one({"route": payload["route"]}, {"$set": payload}, upsert=True)
+    await audit(request, user, "update", "page_seo", payload["route"])
+    return {"status": "ok"}
+
+
+@api.delete("/admin/page-seo")
+async def delete_page_seo(route: str, request: Request,
+                          user=Depends(require_role("super_admin", "admin"))):
+    await db.page_seo.delete_one({"route": route})
+    await audit(request, user, "delete", "page_seo", route)
+    return {"status": "ok"}
+
+
+@api.get("/public-routes")
+async def public_routes():
+    return _PUBLIC_ROUTES
+
+
+# --- JSON-LD Schemas (Organization / LocalBusiness / Service / FAQ / Breadcrumb) ---
+def _crumbs_for(route: str, base: str):
+    parts = [p for p in route.strip("/").split("/") if p]
+    items = [{"@type": "ListItem", "position": 1, "name": "Home", "item": base + "/"}]
+    acc = ""
+    for i, p in enumerate(parts, start=2):
+        acc += "/" + p
+        items.append({"@type": "ListItem", "position": i,
+                      "name": p.replace("-", " ").title(), "item": base + acc})
+    return items
+
+
+@api.get("/schemas")
+async def schemas_for_page(route: str = "/"):
+    settings = await db.site_settings.find_one({"_id": "main"}) or {}
+    base = (settings.get("canonical_base") or os.environ.get("FRONTEND_URL", "")).rstrip("/")
+    site_name = settings.get("site_name") or "TASNED INTEGRATED"
+    schemas = []
+
+    org = {"@context": "https://schema.org", "@type": "Organization", "name": site_name,
+           "url": base or None,
+           "logo": settings.get("logo_url"),
+           "email": settings.get("contact_email"),
+           "telephone": settings.get("contact_phone"),
+           "sameAs": [settings.get("linkedin_url")] if settings.get("linkedin_url") else []}
+    schemas.append({k: v for k, v in org.items() if v})
+
+    lb = {"@context": "https://schema.org", "@type": "LocalBusiness", "name": site_name,
+          "address": {"@type": "PostalAddress", "addressCountry": "SA",
+                      "streetAddress": settings.get("contact_address_en") or "Kingdom of Saudi Arabia"},
+          "telephone": settings.get("contact_phone"),
+          "email": settings.get("contact_email"),
+          "url": base or None,
+          "openingHours": "Mo-Su 00:00-23:59",
+          "identifier": settings.get("commercial_registration")}
+    schemas.append({k: v for k, v in lb.items() if v})
+
+    if route == "/services":
+        docs = await db.cms_items.find({"type": "service", "status": "published"}).to_list(200)
+        for s in docs:
+            d = s.get("data", {})
+            schemas.append({"@context": "https://schema.org", "@type": "Service",
+                            "name": d.get("title_en") or d.get("title_ar"),
+                            "description": d.get("description_en") or d.get("description_ar"),
+                            "provider": {"@type": "Organization", "name": site_name}})
+
+    if route == "/faq":
+        docs = await db.cms_items.find({"type": "faq", "status": "published"}).to_list(200)
+        items = [{"@type": "Question",
+                  "name": d.get("data", {}).get("question_en"),
+                  "acceptedAnswer": {"@type": "Answer",
+                                     "text": d.get("data", {}).get("answer_en") or ""}}
+                 for d in docs if d.get("data", {}).get("question_en")]
+        if items:
+            schemas.append({"@context": "https://schema.org", "@type": "FAQPage",
+                            "mainEntity": items})
+
+    crumbs = _crumbs_for(route, base)
+    if len(crumbs) > 1:
+        schemas.append({"@context": "https://schema.org", "@type": "BreadcrumbList",
+                        "itemListElement": crumbs})
+
+    return schemas
+
+
+# --- Image sitemap ---
+@api.get("/sitemap-images.xml")
+async def sitemap_images():
+    from fastapi.responses import Response as _Resp
+    settings = await db.site_settings.find_one({"_id": "main"}) or {}
+    base = (settings.get("canonical_base") or os.environ.get("FRONTEND_URL", "")).rstrip("/")
+    media = await db.media_assets.find({"mime": {"$regex": "^image/"}}, {"_id": 0}) \
+        .sort("created_at", -1).to_list(500)
+    body = ('<?xml version="1.0" encoding="UTF-8"?>'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+            'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">')
+    body += f'<url><loc>{base}/</loc>'
+    for m in media:
+        body += f'<image:image><image:loc>{base}{m.get("url", "")}</image:loc>'
+        if m.get("alt"):
+            body += f'<image:title>{m["alt"]}</image:title>'
+        if m.get("caption"):
+            body += f'<image:caption>{m["caption"]}</image:caption>'
+        body += '</image:image>'
+    body += '</url></urlset>'
+    return _Resp(content=body, media_type="application/xml")
+
+
+# --- llms.txt for AI search crawlers (ChatGPT / Perplexity / Copilot) ---
+@api.get("/llms.txt")
+async def llms_txt():
+    from fastapi.responses import PlainTextResponse
+    s = await db.site_settings.find_one({"_id": "main"}) or {}
+    base = (s.get("canonical_base") or os.environ.get("FRONTEND_URL", "")).rstrip("/")
+    body = f"""# TASNED INTEGRATED
+> {s.get("seo_description") or "Independent ballast water sampling and inspection services for ships in Saudi Arabian ports."}
+
+## About
+TASNED INTEGRATED is a specialized Saudi Arabian company providing ballast water testing and inspection services for vessels. We support ship owners, operators and fleet managers in meeting compliance requirements under international ballast water management regulations.
+
+## Services
+- Ballast Water Sampling
+- Indicative Analysis (onboard rapid screening)
+- Compliance Verification
+- Scientific Reporting
+- Documentation Support
+
+## Standards
+- IMO Ballast Water Management Convention
+- D-2 Performance Standard
+
+## Contact
+- Email: {s.get("contact_email") or "info@tasned.sa"}
+- Website: {base or "https://tasned.sa"}
+- Location: {s.get("contact_address_en") or "Kingdom of Saudi Arabia"}
+- Commercial Registration: {s.get("commercial_registration") or "7053830597"}
+"""
+    return PlainTextResponse(content=body)
+
+
+# --- update robots.txt to reference both sitemaps ---
+
+
+
 @api.get("/sitemap.xml")
 async def sitemap():
     from fastapi.responses import Response as _Resp
@@ -724,7 +899,7 @@ async def robots():
     from fastapi.responses import PlainTextResponse
     settings = await db.site_settings.find_one({"_id": "main"}) or {}
     base = (settings.get("canonical_base") or os.environ.get("FRONTEND_URL", "")).rstrip("/")
-    body = f"User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/admin/\n\nSitemap: {base}/api/sitemap.xml\n"
+    body = f"User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/admin/\n\nSitemap: {base}/api/sitemap.xml\nSitemap: {base}/api/sitemap-images.xml\n"
     return PlainTextResponse(content=body)
 
 
