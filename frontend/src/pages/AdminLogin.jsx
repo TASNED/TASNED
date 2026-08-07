@@ -20,7 +20,7 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => { if (user) nav("/admin/news"); }, [user, nav]);
+  useEffect(() => { if (user) nav("/admin"); }, [user, nav]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -28,7 +28,7 @@ export default function AdminLogin() {
     try {
       await login(email, password);
       toast.success("Welcome");
-      nav("/admin/news");
+      nav("/admin");
     } catch (err) {
       toast.error(formatErr(err.response?.data?.detail));
     } finally { setLoading(false); }
@@ -49,6 +49,7 @@ export default function AdminLogin() {
             {loading ? "…" : t.admin.signIn}
           </Button>
         </form>
+        <a href="/admin/forgot-password" data-testid="admin-forgot" className="mt-4 inline-block text-sm text-teal hover:text-cyan font-medium">Forgot password?</a>
       </div>
     </div>
   );

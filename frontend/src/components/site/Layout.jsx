@@ -1,69 +1,43 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Lenis from "lenis";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { useApp } from "../../context/AppContext";
+import api from "../../lib/api";
 
-const SITE_URL = "https://www.tasned.sa";
-const DEFAULT_TITLE = "TASNED INTEGRATED — Ballast Water Testing & Marine Laboratory";
-const DEFAULT_DESCRIPTION = "TASNED INTEGRATED provides independent ballast water sampling and laboratory analysis services to support vessel compliance with international marine environmental regulations.";
-const DEFAULT_IMAGE = "https://customer-assets-lxgj4vgw.emergentagent.net/job_marine-testing-hub/artifacts/kut7eg12_WhatsApp%20Image%202026-08-04%20at%208.34.29%20PM.jpeg";
+let _settingsPromise = null;
+function fetchSettings() {
+  if (!_settingsPromise) _settingsPromise = api.get("/settings").then(r => r.data).catch(() => ({}));
+  return _settingsPromise;
+}
 
-const ORGANIZATION_JSON_LD = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "TASNED INTEGRATED",
-  url: SITE_URL,
-  logo: "https://customer-assets-lxgj4vgw.emergentagent.net/job_marine-testing-hub/artifacts/kut7eg12_WhatsApp%20Image%202026-08-04%20at%208.34.29%20PM.jpeg",
-  sameAs: [
-    "https://www.linkedin.com/company/tasnedsa/"
-  ],
-  contactPoint: [
-    {
-      "@type": "ContactPoint",
-      telephone: "+966-500-000000",
-      contactType: "customer support",
-      areaServed: "SA",
-      availableLanguage: ["English", "Arabic"]
-    }
-  ]
-};
+function ensureMeta(name, content, key = "name") {
+  if (!content) return;
+  let el = document.querySelector(`meta[${key}="${name}"]`);
+  if (!el) { el = document.createElement("meta"); el.setAttribute(key, name); document.head.appendChild(el); }
+  el.setAttribute("content", content);
+}
+function ensureLink(rel, href) {
+  if (!href) return;
+  let el = document.querySelector(`link[rel="${rel}"]`);
+  if (!el) { el = document.createElement("link"); el.setAttribute("rel", rel); document.head.appendChild(el); }
+  el.setAttribute("href", href);
+}
+function ensureScript(id, code, isSrc = false) {
+  if (document.getElementById(id)) return;
+  const s = document.createElement("script");
+  s.id = id;
+  if (isSrc) { s.src = code; s.async = true; } else { s.text = code; }
+  document.head.appendChild(s);
+}
 
-const setMeta = (attrName, attrValue, content) => {
-  const selector = `meta[${attrName}="${attrValue}"]`;
-  let node = document.head.querySelector(selector);
-  if (!node) {
-    node = document.createElement("meta");
-    node.setAttribute(attrName, attrValue);
-    document.head.appendChild(node);
-  }
-  node.content = content;
-};
-
-const setLink = (rel, href) => {
-  let node = document.head.querySelector(`link[rel="${rel}"]`);
-  if (!node) {
-    node = document.createElement("link");
-    node.rel = rel;
-    document.head.appendChild(node);
-  }
-  node.href = href;
-};
-
-const setStructuredData = (data) => {
-  let node = document.head.querySelector('script[type="application/ld+json"]');
-  if (!node) {
-    node = document.createElement("script");
-    node.type = "application/ld+json";
-    document.head.appendChild(node);
-  }
-  node.textContent = JSON.stringify(data);
-};
-
-export default function Layout({ children, title, description, image, robots = "index, follow" }) {
+export default function Layout({ children, title, description }) {
   const { pathname } = useLocation();
   const { lang } = useApp();
+  const [settings, setSettings] = useState({});
+
+  useEffect(() => { fetchSettings().then(setSettings); }, []);
 
   useEffect(() => {
     const lenis = new Lenis({ duration: 1.1, smoothWheel: true });
@@ -76,29 +50,41 @@ export default function Layout({ children, title, description, image, robots = "
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
 
   useEffect(() => {
-    const pageTitle = title ? `${title} | TASNED INTEGRATED` : DEFAULT_TITLE;
-    const pageDescription = description || DEFAULT_DESCRIPTION;
-    const canonicalUrl = `${SITE_URL}${pathname}`;
-    const imageUrl = image || DEFAULT_IMAGE;
+    const brand = settings.site_name || "TASNED INTEGRATED";
+    const defaultTitle = settings.seo_title || `${brand} — Ballast Water Testing & Marine Laboratory`;
+    const defaultDesc = settings.seo_description || "Independent ballast water sampling and inspection supporting international marine environmental compliance.";
+    document.title = title ? `${title} | ${brand}` : defaultTitle;
+    ensureMeta("description", description || defaultDesc);
+    ensureMeta("keywords", settings.seo_keywords || "");
+    ensureMeta("robots", settings.robots_default || "index, follow");
+    // Open Graph
+    ensureMeta("og:title", title || defaultTitle, "property");
+    ensureMeta("og:description", description || defaultDesc, "property");
+    ensureMeta("og:type", "website", "property");
+    if (settings.og_image) ensureMeta("og:image", settings.og_image, "property");
+    ensureMeta("twitter:card", "summary_large_image");
+    // Canonical
+    if (settings.canonical_base) {
+      const path = pathname === "/" ? "" : pathname;
+      ensureLink("canonical", `${settings.canonical_base.replace(/\/$/, "")}${path}`);
+    }
+    // Google Search Console
+    if (settings.google_verification) ensureMeta("google-site-verification", settings.google_verification);
+    // hreflang alt for language switch
+    ensureLink("alternate", null); // no-op placeholder; real hreflang added below
+  }, [title, description, lang, pathname, settings]);
 
-    document.title = pageTitle;
-    document.documentElement.lang = lang || "en";
-
-    setMeta("name", "description", pageDescription);
-    setMeta("name", "robots", robots);
-    setMeta("property", "og:type", "website");
-    setMeta("property", "og:site_name", "TASNED INTEGRATED");
-    setMeta("property", "og:title", pageTitle);
-    setMeta("property", "og:description", pageDescription);
-    setMeta("property", "og:url", canonicalUrl);
-    setMeta("property", "og:image", imageUrl);
-    setMeta("name", "twitter:card", "summary_large_image");
-    setMeta("name", "twitter:title", pageTitle);
-    setMeta("name", "twitter:description", pageDescription);
-    setMeta("name", "twitter:image", imageUrl);
-    setLink("canonical", canonicalUrl);
-    setStructuredData(ORGANIZATION_JSON_LD);
-  }, [title, description, image, robots, pathname, lang]);
+  useEffect(() => {
+    // GA4
+    if (settings.ga4_measurement_id && !document.getElementById("ga4-src")) {
+      ensureScript("ga4-src", `https://www.googletagmanager.com/gtag/js?id=${settings.ga4_measurement_id}`, true);
+      ensureScript("ga4-init", `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${settings.ga4_measurement_id}');`);
+    }
+    // GTM
+    if (settings.gtm_id && !document.getElementById("gtm-src")) {
+      ensureScript("gtm-src", `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${settings.gtm_id}');`);
+    }
+  }, [settings.ga4_measurement_id, settings.gtm_id]);
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

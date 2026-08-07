@@ -8,6 +8,9 @@ load_dotenv(ROOT_DIR / '.env')
 import logging
 import uuid
 import base64
+import io
+import secrets
+import hashlib
 import jwt
 import bcrypt
 import httpx
@@ -16,9 +19,12 @@ from typing import List, Optional
 
 from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends, UploadFile, File, Form
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi.staticfiles import StaticFiles
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from bson import ObjectId
+from PIL import Image
 
 # ------------------------------------------------------------------ config
 mongo_url = os.environ['MONGO_URL']
@@ -315,6 +321,413 @@ async def list_careers(user: dict = Depends(get_current_user)):
     return docs
 
 
+# ================================================================== ENTERPRISE CMS
+# --- shared helpers ---
+def require_role(*allowed):
+    async def _dep(user: dict = Depends(get_current_user)):
+        if user.get("role") not in allowed:
+            raise HTTPException(status_code=403, detail="Forbidden")
+        return user
+    return _dep
+
+
+async def audit(request: Request, user: dict, action: str, resource: str, resource_id: str = "", meta: dict = None):
+    ip = request.client.host if request and request.client else ""
+    await db.audit_logs.insert_one({
+        "user_id": user.get("id"), "user_email": user.get("email"), "role": user.get("role"),
+        "action": action, "resource": resource, "resource_id": str(resource_id or ""),
+        "meta": meta or {}, "ip": ip,
+        "ts": datetime.now(timezone.utc).isoformat(),
+    })
+
+
+def _hash_token(t: str) -> str:
+    return hashlib.sha256(t.encode()).hexdigest()
+
+
+# --- Password reset ---
+class ForgotBody(BaseModel):
+    email: EmailStr
+
+
+class ResetBody(BaseModel):
+    token: str
+    password: str
+
+
+@api.post("/auth/forgot-password")
+async def forgot_password(body: ForgotBody):
+    user = await db.users.find_one({"email": body.email.lower()})
+    if user:
+        raw = secrets.token_urlsafe(32)
+        await db.password_reset_tokens.insert_one({
+            "user_id": str(user["_id"]),
+            "token_hash": _hash_token(raw),
+            "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
+            "used": False,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+        link = f"{os.environ.get('FRONTEND_URL','')}/admin/reset-password?token={raw}"
+        html = f"""<div style='font-family:Arial,sans-serif;max-width:520px;margin:auto'>
+          <div style='background:#0A1F3D;padding:24px;color:#fff'><h2 style='margin:0'>Password Reset</h2>
+          <p style='margin:4px 0 0;color:#00C2C7'>TASNED INTEGRATED</p></div>
+          <div style='padding:20px'><p>You requested to reset your admin password. Click the link below (valid for 1 hour):</p>
+          <p><a href='{link}' style='color:#0A1F3D;font-weight:600'>{link}</a></p>
+          <p style='color:#5B6770;font-size:12px'>If you did not request this, please ignore this message.</p></div></div>"""
+        await send_email(body.email.lower(), "Reset Your Password — TASNED INTEGRATED", html)
+    return {"status": "ok"}
+
+
+@api.post("/auth/reset-password")
+async def reset_password(body: ResetBody):
+    if len(body.password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+    h = _hash_token(body.token)
+    rec = await db.password_reset_tokens.find_one({"token_hash": h, "used": False})
+    if not rec:
+        raise HTTPException(status_code=400, detail="Invalid or already used token")
+    if datetime.fromisoformat(rec["expires_at"]) < datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="Token expired")
+    await db.users.update_one({"_id": ObjectId(rec["user_id"])},
+                              {"$set": {"password_hash": hash_password(body.password)}})
+    await db.password_reset_tokens.update_one({"_id": rec["_id"]}, {"$set": {"used": True}})
+    return {"status": "ok"}
+
+
+# --- Users (RBAC — super_admin only) ---
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+    name: str = ""
+    role: str = "editor"
+
+
+_VALID_ROLES = {"super_admin", "admin", "editor"}
+
+
+@api.get("/admin/users")
+async def list_users(user=Depends(require_role("super_admin"))):
+    docs = await db.users.find({}, {"password_hash": 0}).sort("created_at", 1).to_list(500)
+    out = []
+    for d in docs:
+        d["id"] = str(d.pop("_id"))
+        out.append(d)
+    return out
+
+
+@api.post("/admin/users")
+async def create_user_admin(body: UserCreate, request: Request, user=Depends(require_role("super_admin"))):
+    if body.role not in _VALID_ROLES:
+        raise HTTPException(status_code=400, detail="Invalid role")
+    if len(body.password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+    if await db.users.find_one({"email": body.email.lower()}):
+        raise HTTPException(status_code=400, detail="Email already registered")
+    doc = {"email": body.email.lower(), "password_hash": hash_password(body.password),
+           "name": body.name, "role": body.role,
+           "created_at": datetime.now(timezone.utc).isoformat()}
+    res = await db.users.insert_one(doc)
+    await audit(request, user, "create", "user", str(res.inserted_id), {"email": body.email, "role": body.role})
+    return {"id": str(res.inserted_id), "email": body.email.lower(), "role": body.role, "name": body.name}
+
+
+@api.put("/admin/users/{uid}")
+async def update_user_admin(uid: str, body: dict, request: Request, user=Depends(require_role("super_admin"))):
+    updates = {}
+    if "role" in body and body["role"] in _VALID_ROLES:
+        updates["role"] = body["role"]
+    if "name" in body:
+        updates["name"] = body["name"]
+    if body.get("password"):
+        if len(body["password"]) < 8:
+            raise HTTPException(status_code=400, detail="Password too short")
+        updates["password_hash"] = hash_password(body["password"])
+    if updates:
+        await db.users.update_one({"_id": ObjectId(uid)}, {"$set": updates})
+    await audit(request, user, "update", "user", uid,
+                {k: ("***" if k == "password_hash" else v) for k, v in updates.items()})
+    return {"status": "ok"}
+
+
+@api.delete("/admin/users/{uid}")
+async def delete_user_admin(uid: str, request: Request, user=Depends(require_role("super_admin"))):
+    if uid == user.get("id"):
+        raise HTTPException(status_code=400, detail="You cannot delete yourself")
+    await db.users.delete_one({"_id": ObjectId(uid)})
+    await audit(request, user, "delete", "user", uid)
+    return {"status": "ok"}
+
+
+# --- CMS items (generic) ---
+_ALLOWED_TYPES = {"service", "team_member", "client", "testimonial", "faq",
+                  "homepage_section", "menu_item", "page_content"}
+
+
+def _cms_out(doc: dict) -> dict:
+    doc["id"] = str(doc.pop("_id"))
+    return doc
+
+
+def _published_query(now_iso: str) -> dict:
+    return {"status": "published",
+            "$or": [{"published_at": {"$lte": now_iso}}, {"published_at": None}, {"published_at": ""}]}
+
+
+@api.get("/cms/{ctype}")
+async def list_cms_public(ctype: str):
+    if ctype not in _ALLOWED_TYPES:
+        raise HTTPException(status_code=404, detail="Unknown type")
+    now_iso = datetime.now(timezone.utc).isoformat()
+    docs = await db.cms_items.find({"type": ctype, **_published_query(now_iso)}) \
+        .sort([("order", 1), ("created_at", 1)]).to_list(500)
+    return [_cms_out(d) for d in docs]
+
+
+@api.get("/admin/cms/{ctype}")
+async def list_cms_admin(ctype: str, user=Depends(require_role("super_admin", "admin", "editor"))):
+    if ctype not in _ALLOWED_TYPES:
+        raise HTTPException(status_code=404, detail="Unknown type")
+    docs = await db.cms_items.find({"type": ctype}) \
+        .sort([("order", 1), ("created_at", 1)]).to_list(500)
+    return [_cms_out(d) for d in docs]
+
+
+@api.post("/admin/cms/{ctype}")
+async def create_cms(ctype: str, body: dict, request: Request,
+                     user=Depends(require_role("super_admin", "admin", "editor"))):
+    if ctype not in _ALLOWED_TYPES:
+        raise HTTPException(status_code=404, detail="Unknown type")
+    now = datetime.now(timezone.utc).isoformat()
+    doc = {
+        "type": ctype, "data": body.get("data", {}),
+        "status": body.get("status", "draft"),
+        "published_at": body.get("published_at"),
+        "order": int(body.get("order", 0)),
+        "slug": body.get("slug"),
+        "created_at": now, "updated_at": now,
+        "created_by": user.get("email"), "updated_by": user.get("email"),
+    }
+    res = await db.cms_items.insert_one(doc)
+    await audit(request, user, "create", f"cms.{ctype}", str(res.inserted_id))
+    doc["_id"] = res.inserted_id
+    return _cms_out(doc)
+
+
+@api.put("/admin/cms/{ctype}/{item_id}")
+async def update_cms(ctype: str, item_id: str, body: dict, request: Request,
+                     user=Depends(require_role("super_admin", "admin", "editor"))):
+    old = await db.cms_items.find_one({"_id": ObjectId(item_id)})
+    if not old:
+        raise HTTPException(status_code=404, detail="Not found")
+    await db.cms_versions.insert_one({
+        "item_id": item_id, "type": ctype,
+        "snapshot": {k: v for k, v in old.items() if k != "_id"},
+        "editor": user.get("email"),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+    updates = {"updated_at": datetime.now(timezone.utc).isoformat(), "updated_by": user.get("email")}
+    for k in ("data", "status", "published_at", "order", "slug"):
+        if k in body:
+            updates[k] = body[k]
+    await db.cms_items.update_one({"_id": ObjectId(item_id)}, {"$set": updates})
+    await audit(request, user, "update", f"cms.{ctype}", item_id)
+    doc = await db.cms_items.find_one({"_id": ObjectId(item_id)})
+    return _cms_out(doc)
+
+
+@api.delete("/admin/cms/{ctype}/{item_id}")
+async def delete_cms(ctype: str, item_id: str, request: Request,
+                     user=Depends(require_role("super_admin", "admin"))):
+    await db.cms_items.delete_one({"_id": ObjectId(item_id)})
+    await audit(request, user, "delete", f"cms.{ctype}", item_id)
+    return {"status": "ok"}
+
+
+@api.get("/admin/cms/{ctype}/{item_id}/versions")
+async def list_versions(ctype: str, item_id: str,
+                        user=Depends(require_role("super_admin", "admin", "editor"))):
+    docs = await db.cms_versions.find({"item_id": item_id}).sort("created_at", -1).to_list(50)
+    out = []
+    for d in docs:
+        d["id"] = str(d.pop("_id"))
+        out.append(d)
+    return out
+
+
+@api.post("/admin/cms/{ctype}/{item_id}/restore/{version_id}")
+async def restore_version(ctype: str, item_id: str, version_id: str, request: Request,
+                          user=Depends(require_role("super_admin", "admin"))):
+    ver = await db.cms_versions.find_one({"_id": ObjectId(version_id)})
+    if not ver:
+        raise HTTPException(status_code=404, detail="Version not found")
+    snap = ver["snapshot"]
+    current = await db.cms_items.find_one({"_id": ObjectId(item_id)})
+    if current:
+        await db.cms_versions.insert_one({
+            "item_id": item_id, "type": ctype,
+            "snapshot": {k: v for k, v in current.items() if k != "_id"},
+            "editor": user.get("email"),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+    updates = {k: snap.get(k) for k in ("data", "status", "published_at", "order", "slug", "type")}
+    updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+    updates["updated_by"] = user.get("email")
+    await db.cms_items.update_one({"_id": ObjectId(item_id)}, {"$set": updates})
+    await audit(request, user, "restore", f"cms.{ctype}", item_id, {"version_id": version_id})
+    return {"status": "ok"}
+
+
+# --- Site settings (Menu / Footer / Contact / SEO / GA / GTM / GSC) ---
+@api.get("/settings")
+async def get_settings_public():
+    doc = await db.site_settings.find_one({"_id": "main"}) or {}
+    doc.pop("_id", None)
+    return doc
+
+
+@api.put("/admin/settings")
+async def update_settings(body: dict, request: Request,
+                          user=Depends(require_role("super_admin", "admin"))):
+    body["updated_at"] = datetime.now(timezone.utc).isoformat()
+    body["updated_by"] = user.get("email")
+    await db.site_settings.update_one({"_id": "main"}, {"$set": body}, upsert=True)
+    await audit(request, user, "update", "settings", "main")
+    return {"status": "ok"}
+
+
+# --- Media library ---
+UPLOADS_DIR = ROOT_DIR / "uploads"
+UPLOADS_DIR.mkdir(exist_ok=True)
+(UPLOADS_DIR / "media").mkdir(exist_ok=True)
+_IMG_EXTS = {"jpg", "jpeg", "png", "webp", "gif", "bmp"}
+
+
+@api.post("/admin/media/upload")
+async def upload_media(request: Request,
+                       file: UploadFile = File(...),
+                       folder: str = Form("root"),
+                       alt: str = Form(""),
+                       caption: str = Form(""),
+                       user=Depends(require_role("super_admin", "admin", "editor"))):
+    raw = await file.read()
+    if len(raw) == 0:
+        raise HTTPException(status_code=400, detail="Empty file")
+    if len(raw) > 20 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large (max 20 MB)")
+    fid = uuid.uuid4().hex
+    orig_ext = (file.filename.rsplit(".", 1)[-1].lower()
+                if file.filename and "." in file.filename else "bin")
+    is_image = orig_ext in _IMG_EXTS
+    width = height = None
+    mime = file.content_type or "application/octet-stream"
+    if is_image and orig_ext != "gif":
+        try:
+            img = Image.open(io.BytesIO(raw))
+            if img.mode not in ("RGB", "RGBA"):
+                img = img.convert("RGB")
+            width, height = img.size
+            saved_name = f"{fid}.webp"
+            img.save(UPLOADS_DIR / "media" / saved_name, "WEBP", quality=85, method=6)
+            mime = "image/webp"
+        except Exception:
+            saved_name = f"{fid}.{orig_ext}"
+            (UPLOADS_DIR / "media" / saved_name).write_bytes(raw)
+    else:
+        saved_name = f"{fid}.{orig_ext}"
+        (UPLOADS_DIR / "media" / saved_name).write_bytes(raw)
+    file_size = (UPLOADS_DIR / "media" / saved_name).stat().st_size
+    url_path = f"/api/media/files/{saved_name}"
+    doc = {"id": fid, "filename": file.filename, "stored_name": saved_name, "url": url_path,
+           "mime": mime, "size": file_size, "width": width, "height": height,
+           "alt": alt, "caption": caption, "folder": folder or "root",
+           "created_at": datetime.now(timezone.utc).isoformat(),
+           "uploaded_by": user.get("email")}
+    await db.media_assets.insert_one({**doc})
+    await audit(request, user, "create", "media", fid, {"filename": file.filename})
+    return doc
+
+
+@api.get("/admin/media")
+async def list_media(q: str = "", folder: str = "",
+                     user=Depends(require_role("super_admin", "admin", "editor"))):
+    query = {}
+    if folder:
+        query["folder"] = folder
+    if q:
+        query["$or"] = [
+            {"filename": {"$regex": q, "$options": "i"}},
+            {"alt": {"$regex": q, "$options": "i"}},
+            {"caption": {"$regex": q, "$options": "i"}},
+        ]
+    docs = await db.media_assets.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return docs
+
+
+@api.put("/admin/media/{fid}")
+async def update_media(fid: str, body: dict, request: Request,
+                       user=Depends(require_role("super_admin", "admin", "editor"))):
+    updates = {k: body[k] for k in ("alt", "caption", "folder") if k in body}
+    await db.media_assets.update_one({"id": fid}, {"$set": updates})
+    await audit(request, user, "update", "media", fid)
+    return {"status": "ok"}
+
+
+@api.delete("/admin/media/{fid}")
+async def delete_media(fid: str, request: Request,
+                       user=Depends(require_role("super_admin", "admin"))):
+    doc = await db.media_assets.find_one({"id": fid})
+    if doc:
+        try:
+            (UPLOADS_DIR / "media" / doc["stored_name"]).unlink()
+        except Exception:
+            pass
+        await db.media_assets.delete_one({"id": fid})
+    await audit(request, user, "delete", "media", fid)
+    return {"status": "ok"}
+
+
+# --- Audit log ---
+@api.get("/admin/audit")
+async def get_audit_log(limit: int = 100,
+                        user=Depends(require_role("super_admin", "admin"))):
+    docs = await db.audit_logs.find({}, {"_id": 0}).sort("ts", -1).to_list(min(limit, 500))
+    return docs
+
+
+# --- SEO: sitemap.xml + robots.txt ---
+_PUBLIC_ROUTES = ["/", "/about", "/services", "/ballast-water-testing", "/standards",
+                  "/industries", "/faq", "/news", "/contact", "/careers",
+                  "/privacy", "/terms"]
+
+
+@api.get("/sitemap.xml")
+async def sitemap():
+    from fastapi.responses import Response as _Resp
+    settings = await db.site_settings.find_one({"_id": "main"}) or {}
+    base = (settings.get("canonical_base") or os.environ.get("FRONTEND_URL", "")).rstrip("/")
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    urls = "".join(
+        f"<url><loc>{base}{p}</loc><changefreq>weekly</changefreq><lastmod>{now}</lastmod></url>"
+        for p in _PUBLIC_ROUTES
+    )
+    news_docs = await db.news.find({"published": True}, {"slug": 1, "created_at": 1}).to_list(500)
+    urls += "".join(
+        f"<url><loc>{base}/news/{n['slug']}</loc><changefreq>monthly</changefreq><lastmod>{(n.get('created_at') or now)[:10]}</lastmod></url>"
+        for n in news_docs
+    )
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>"""
+    return _Resp(content=xml, media_type="application/xml")
+
+
+@api.get("/robots.txt")
+async def robots():
+    from fastapi.responses import PlainTextResponse
+    settings = await db.site_settings.find_one({"_id": "main"}) or {}
+    base = (settings.get("canonical_base") or os.environ.get("FRONTEND_URL", "")).rstrip("/")
+    body = f"User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/admin/\n\nSitemap: {base}/api/sitemap.xml\n"
+    return PlainTextResponse(content=body)
+
+
 @api.get("/")
 async def root():
     return {"message": "TASNED INTEGRATED API"}
@@ -324,19 +737,51 @@ async def root():
 @app.on_event("startup")
 async def startup():
     await db.users.create_index("email", unique=True)
+    await db.cms_items.create_index([("type", 1), ("status", 1), ("published_at", 1)])
+    await db.cms_versions.create_index([("item_id", 1), ("created_at", -1)])
+    await db.audit_logs.create_index([("ts", -1)])
+    await db.media_assets.create_index([("created_at", -1)])
+    await db.password_reset_tokens.create_index("token_hash")
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@tasned.sa").lower()
     admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
     existing = await db.users.find_one({"email": admin_email})
     if existing is None:
         await db.users.insert_one({"email": admin_email, "password_hash": hash_password(admin_password),
-                                   "name": "Admin", "role": "admin",
+                                   "name": "Admin", "role": "super_admin",
                                    "created_at": datetime.now(timezone.utc).isoformat()})
-        logger.info("Seeded admin user")
-    elif not verify_password(admin_password, existing["password_hash"]):
-        await db.users.update_one({"email": admin_email}, {"$set": {"password_hash": hash_password(admin_password)}})
+        logger.info("Seeded super_admin user")
+    else:
+        updates = {}
+        if not verify_password(admin_password, existing["password_hash"]):
+            updates["password_hash"] = hash_password(admin_password)
+        if existing.get("role") != "super_admin":
+            updates["role"] = "super_admin"
+        if updates:
+            await db.users.update_one({"email": admin_email}, {"$set": updates})
 
 
 app.include_router(api)
+
+
+# --- Security headers middleware ---
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+        response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
+
+# --- Static file serving for uploaded media ---
+app.mount("/api/media/files",
+          StaticFiles(directory=str((ROOT_DIR / "uploads" / "media"))),
+          name="media_files")
+
 _cors = os.environ.get("CORS_ORIGINS", os.environ.get("FRONTEND_URL", "http://localhost:3000"))
 _origins = [o.strip() for o in _cors.split(",") if o.strip()]
 app.add_middleware(

@@ -1,15 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../components/site/Layout";
 import { Reveal, SectionHeading, PageHero } from "../components/site/Shared";
 import Icon from "../lib/icons";
 import { useApp } from "../context/AppContext";
 import { IMAGES } from "../content";
+import api from "../lib/api";
 import { ArrowRight } from "lucide-react";
 
 export default function Services() {
-  const { t } = useApp();
-  const services = t.services.slice(0, 6);
+  const { t, lang } = useApp();
+  const [cms, setCms] = useState(null);
+  useEffect(() => { api.get("/cms/service").then(({ data }) => setCms(data)).catch(() => setCms([])); }, []);
+  const services = cms && cms.length > 0
+    ? cms.map((it) => ({
+        icon: it.data?.icon || "Droplets",
+        t: lang === "ar" && it.data?.title_ar ? it.data.title_ar : (it.data?.title_en || ""),
+        d: lang === "ar" && it.data?.description_ar ? it.data.description_ar : (it.data?.description_en || ""),
+      }))
+    : t.services.slice(0, 6);
   return (
     <Layout title={t.nav.services} description={t.servicesSection.title}>
       <PageHero eyebrow={t.servicesSection.label} title={t.servicesSection.title} image={IMAGES.labBeakers} crumbs={[t.nav.home, t.nav.services]} />
