@@ -1002,6 +1002,38 @@ async def startup():
 app.include_router(api)
 
 
+# ------------------------------------------------------------------ pluggable modules
+# Auto-discover and mount every module in backend/modules/*.py.
+# See modules/__init__.py for the contract.
+from modules import collect_modules  # noqa: E402
+
+_LOADED_MODULES = collect_modules()
+for _m in _LOADED_MODULES:
+    if _m.router is not None:
+        app.include_router(_m.router)
+        logger.info("Loaded module '%s' v%s", _m.name, _m.version)
+    else:
+        logger.error("Module '%s' failed to load: %s", _m.name, _m.error)
+
+
+@app.get("/api/modules")
+async def list_modules():
+    """Return metadata for every pluggable module currently loaded."""
+    return {
+        "count": len(_LOADED_MODULES),
+        "modules": [
+            {
+                "name": m.name,
+                "version": m.version,
+                "loaded": m.router is not None,
+                "error": m.error,
+                "prefix": (m.router.prefix if m.router is not None else None),
+            }
+            for m in _LOADED_MODULES
+        ],
+    }
+
+
 # --- Security headers middleware ---
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
