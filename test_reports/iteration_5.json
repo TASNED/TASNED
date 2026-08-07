@@ -1,0 +1,44 @@
+{
+  "summary": "Backend security-layer verification for TASNED INTEGRATED. Wrote /app/backend/tests/test_security_layer.py (16 tests) covering security headers, password policy, rate limits (login/contact/forgot-password), audit entries (login/login_failed/logout), CSRF Origin/Referer check, HTML sanitization on /news, and regression flows. Result: 15 passed, 1 xfailed. The single xfail exposes a real bug: in the emergent preview ingress the client-sent `Origin` header is rewritten to the internal cluster hostname (https://marine-testing-hub.cluster-10.preview.emergentcf.cloud), which does NOT match CORS_ORIGINS, so ALL admin panel mutations from a real browser will be blocked with 403 'CSRF: origin not allowed'.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "/api/admin/* (all POST/PUT/PATCH/DELETE)",
+        "issue": "CSRF Origin allow-list is too strict for the emergent preview environment. The ingress rewrites the client's Origin header to the internal cluster URL 'https://marine-testing-hub.cluster-10.preview.emergentcf.cloud' before it reaches the app. Because that value does not startsWith any entry in CORS_ORIGINS (which is 'https://marine-testing-hub.preview.emergentagent.com'), every mutating admin request from a browser returns 403 'CSRF: origin not allowed'. Reproduced with curl: sending Origin=<preview URL> to POST /api/admin/cms/service returns 403; sending no Origin header returns 201. Backend log shows: `CSRF-BLOCK path=/api/admin/cms/service origin='https://marine-testing-hub.cluster-10.preview.emergentcf.cloud' allowed=['https://marine-testing-hub.preview.emergentagent.com']`.",
+        "priority": "CRITICAL"
+      }
+    ],
+    "minor": [
+      {
+        "endpoint": "/api/auth/login and rate-limited endpoints",
+        "issue": "Rate-limit is per-IP via slowapi in-memory storage. Behind an ingress with >1 backend replica the effective quota is multiplied by replica count and 429s are non-deterministic — the 11th request may still succeed. Consider a shared store (Redis) or documenting the deployment assumption of a single replica."
+      }
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_security_layer.py",
+    "/app/test_reports/pytest/security_layer.xml"
+  ],
+  "action_items": [
+    "Fix CSRF Origin check: either (a) add the internal cluster hostname pattern to the allow-list (e.g. include '*.cluster-*.preview.emergentcf.cloud' or read from an additional env var), or (b) match by hostname suffix / registered domain instead of full startsWith, or (c) trust an explicit forwarded-host header set by the ingress. Without this fix the admin panel is unusable in the preview environment (all POST/PUT/DELETE from the browser return 403).",
+    "Optional: swap slowapi in-memory limiter for a Redis-backed store to make rate limits reliable across multiple backend replicas."
+  ],
+  "critical_code_review_comments": [
+    "server.py is 1069 lines — approaching the 700-line guideline; split into routers (auth, news, cms, admin, seo, security) for maintainability.",
+    "SecurityHeadersMiddleware imports JSONResponse inside the request path — move to module-level import.",
+    "Origin check uses `startswith`, which is prefix-greedy: 'https://evil.com.attacker.example' would pass if 'https://evil.com' were allowed. Use exact hostname match (urlparse().hostname) instead of startsWith.",
+    "Reset-password endpoint runs password policy BEFORE token validation (line 448). That leaks a small oracle (attacker learns policy) but is otherwise fine — acceptable.",
+    "audit_logs entries store 'ip' from request.client.host which behind ingress is the reverse-proxy pod IP; consider reading X-Forwarded-For when trusted."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_security_layer.py"
+  ],
+  "success_rate": {"backend": "94% (15/16, 1 xfail — real bug)", "frontend": "n/a (not requested)"},
+  "test_credentials": "admin@tasned.sa / 12a34b56cd21 (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None persisted. All test-created news/CMS/user records are deleted at the end of each test. Rate-limit tests pollute per-IP slowapi buckets for ~60s.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "After main agent fixes the CSRF Origin allow-list, re-run /app/backend/tests/test_security_layer.py — remove the pytest.xfail branch inside TestCSRFOrigin.test_admin_mutation_matching_origin_allowed and assert strict 200/201. Also verify with a real browser (Playwright) that admin CMS mutations succeed. Rate-limit tests must be run WITHOUT pytest-xdist (they mutate shared per-IP state); use `pytest -o addopts=''`. Full backend .env: CORS_ORIGINS='https://marine-testing-hub.preview.emergentagent.com'.",
+  "rca of the issue": "Reproduction: `curl -X POST $BACKEND/api/admin/cms/service -H 'Cookie: access_token=...' -H 'Origin: https://marine-testing-hub.preview.emergentagent.com' -d '{...}'` → 403. Same call without Origin → 201. Backend log confirms the middleware sees origin='https://marine-testing-hub.cluster-10.preview.emergentcf.cloud' because the emergent ingress rewrites the Origin header to the internal cluster hostname. Fix options listed in action_items."
+}

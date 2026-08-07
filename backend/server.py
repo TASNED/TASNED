@@ -25,6 +25,12 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from bson import ObjectId
 from PIL import Image
+import bleach
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+import re
 
 # ------------------------------------------------------------------ config
 mongo_url = os.environ['MONGO_URL']
@@ -42,7 +48,31 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("tasned")
 
 app = FastAPI(title="TASNED INTEGRATED API")
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
 api = APIRouter(prefix="/api")
+
+
+# ------------------------------------------------------------------ security helpers
+_PASSWORD_RE = re.compile(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+\-={}\[\]:;\"'<>,.?/\\|`~]{8,}$")
+
+
+def enforce_password_policy(password: str):
+    """Min 8 chars, at least one letter and one digit."""
+    if not password or len(password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+    if not _PASSWORD_RE.match(password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one letter and one digit")
+
+
+def sanitize_html(text: str) -> str:
+    """Strip dangerous HTML to prevent stored XSS in editor content."""
+    if not text:
+        return ""
+    return bleach.clean(text, tags=["p", "br", "strong", "em", "u", "a", "ul", "ol", "li",
+                                    "h1", "h2", "h3", "h4", "blockquote", "code", "pre"],
+                        attributes={"a": ["href", "title", "target", "rel"]},
+                        protocols=["http", "https", "mailto"], strip=True)
 
 
 # ------------------------------------------------------------------ helpers
@@ -152,19 +182,44 @@ def news_doc_to_out(doc: dict) -> dict:
 
 # ------------------------------------------------------------------ auth routes
 @api.post("/auth/login")
-async def login(body: LoginRequest, response: Response):
+@limiter.limit("10/minute")
+async def login(body: LoginRequest, request: Request, response: Response):
     email = body.email.lower()
     user = await db.users.find_one({"email": email})
     if not user or not verify_password(body.password, user["password_hash"]):
+        await db.audit_logs.insert_one({
+            "user_email": email, "role": None, "action": "login_failed",
+            "resource": "auth", "resource_id": "", "meta": {},
+            "ip": request.client.host if request.client else "",
+            "ts": datetime.now(timezone.utc).isoformat(),
+        })
         raise HTTPException(status_code=401, detail="Invalid email or password")
     token = create_access_token(str(user["_id"]), email)
     response.set_cookie(key="access_token", value=token, httponly=True,
                         secure=True, samesite="none", max_age=43200, path="/")
+    await db.audit_logs.insert_one({
+        "user_id": str(user["_id"]), "user_email": email, "role": user.get("role"),
+        "action": "login", "resource": "auth", "resource_id": str(user["_id"]),
+        "meta": {}, "ip": request.client.host if request.client else "",
+        "ts": datetime.now(timezone.utc).isoformat(),
+    })
     return {"id": str(user["_id"]), "email": email, "name": user.get("name", "Admin"), "role": user.get("role", "admin")}
 
 
 @api.post("/auth/logout")
-async def logout(response: Response):
+async def logout(request: Request, response: Response):
+    token = request.cookies.get("access_token")
+    if token:
+        try:
+            payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            await db.audit_logs.insert_one({
+                "user_id": payload.get("sub"), "user_email": payload.get("email"),
+                "action": "logout", "resource": "auth", "resource_id": payload.get("sub") or "",
+                "meta": {}, "ip": request.client.host if request.client else "",
+                "ts": datetime.now(timezone.utc).isoformat(),
+            })
+        except Exception:
+            pass
     response.delete_cookie("access_token", path="/")
     return {"status": "ok"}
 
@@ -197,6 +252,8 @@ async def create_news(body: NewsBase, user: dict = Depends(get_current_user)):
     if await db.news.find_one({"slug": slug}):
         slug = f"{slug}-{str(uuid.uuid4())[:4]}"
     doc = body.model_dump()
+    doc["body_en"] = sanitize_html(doc.get("body_en", ""))
+    doc["body_ar"] = sanitize_html(doc.get("body_ar", ""))
     doc["slug"] = slug
     doc["created_at"] = datetime.now(timezone.utc).isoformat()
     res = await db.news.insert_one(doc)
@@ -206,7 +263,10 @@ async def create_news(body: NewsBase, user: dict = Depends(get_current_user)):
 
 @api.put("/news/{item_id}", response_model=NewsOut)
 async def update_news(item_id: str, body: NewsBase, user: dict = Depends(get_current_user)):
-    await db.news.update_one({"_id": ObjectId(item_id)}, {"$set": body.model_dump()})
+    payload = body.model_dump()
+    payload["body_en"] = sanitize_html(payload.get("body_en", ""))
+    payload["body_ar"] = sanitize_html(payload.get("body_ar", ""))
+    await db.news.update_one({"_id": ObjectId(item_id)}, {"$set": payload})
     doc = await db.news.find_one({"_id": ObjectId(item_id)})
     if not doc:
         raise HTTPException(status_code=404, detail="Not found")
@@ -221,7 +281,8 @@ async def delete_news(item_id: str, user: dict = Depends(get_current_user)):
 
 # ------------------------------------------------------------------ contact route
 @api.post("/contact")
-async def contact(body: ContactRequest):
+@limiter.limit("10/minute")
+async def contact(body: ContactRequest, request: Request):
     doc = body.model_dump()
     doc["id"] = str(uuid.uuid4())
     doc["created_at"] = datetime.now(timezone.utc).isoformat()
@@ -254,7 +315,9 @@ ALLOWED_CV_EXTS = {".pdf", ".doc", ".docx"}
 
 
 @api.post("/careers")
+@limiter.limit("5/minute")
 async def careers(
+    request: Request,
     full_name: str = Form(...),
     mobile: str = Form(...),
     email: str = Form(...),
@@ -356,7 +419,8 @@ class ResetBody(BaseModel):
 
 
 @api.post("/auth/forgot-password")
-async def forgot_password(body: ForgotBody):
+@limiter.limit("5/minute")
+async def forgot_password(body: ForgotBody, request: Request):
     user = await db.users.find_one({"email": body.email.lower()})
     if user:
         raw = secrets.token_urlsafe(32)
@@ -379,9 +443,9 @@ async def forgot_password(body: ForgotBody):
 
 
 @api.post("/auth/reset-password")
-async def reset_password(body: ResetBody):
-    if len(body.password) < 8:
-        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+@limiter.limit("5/minute")
+async def reset_password(body: ResetBody, request: Request):
+    enforce_password_policy(body.password)
     h = _hash_token(body.token)
     rec = await db.password_reset_tokens.find_one({"token_hash": h, "used": False})
     if not rec:
@@ -419,8 +483,7 @@ async def list_users(user=Depends(require_role("super_admin"))):
 async def create_user_admin(body: UserCreate, request: Request, user=Depends(require_role("super_admin"))):
     if body.role not in _VALID_ROLES:
         raise HTTPException(status_code=400, detail="Invalid role")
-    if len(body.password) < 8:
-        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+    enforce_password_policy(body.password)
     if await db.users.find_one({"email": body.email.lower()}):
         raise HTTPException(status_code=400, detail="Email already registered")
     doc = {"email": body.email.lower(), "password_hash": hash_password(body.password),
@@ -439,8 +502,7 @@ async def update_user_admin(uid: str, body: dict, request: Request, user=Depends
     if "name" in body:
         updates["name"] = body["name"]
     if body.get("password"):
-        if len(body["password"]) < 8:
-            raise HTTPException(status_code=400, detail="Password too short")
+        enforce_password_policy(body["password"])
         updates["password_hash"] = hash_password(body["password"])
     if updates:
         await db.users.update_one({"_id": ObjectId(uid)}, {"$set": updates})
@@ -941,16 +1003,50 @@ app.include_router(api)
 # --- Security headers middleware ---
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        # CSRF/Origin check for state-changing admin requests
+        method = request.method.upper()
+        path = request.url.path
+        if method in ("POST", "PUT", "PATCH", "DELETE") and path.startswith("/api/admin/"):
+            origin = request.headers.get("origin") or request.headers.get("referer") or ""
+            allowed = os.environ.get("CORS_ORIGINS", "").split(",")
+            allowed = [a.strip() for a in allowed if a.strip()]
+            if origin and allowed and not any(origin.startswith(a) for a in allowed):
+                from fastapi.responses import JSONResponse
+                return JSONResponse(status_code=403, content={"detail": "CSRF: origin not allowed"})
         response = await call_next(request)
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+        response.headers.setdefault("X-XSS-Protection", "1; mode=block")
         response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
-        response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
-        response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+        response.headers.setdefault("Permissions-Policy",
+                                    "camera=(), microphone=(), geolocation=(), interest-cohort=()")
+        response.headers.setdefault("Strict-Transport-Security",
+                                    "max-age=31536000; includeSubDomains; preload")
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'self'; "
+            "img-src 'self' data: blob: https:; "
+            "media-src 'self' https:; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "font-src 'self' data: https://fonts.gstatic.com; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://tagmanager.google.com; "
+            "connect-src 'self' https: wss:; "
+            "frame-src 'self' https://www.google.com https://maps.google.com https://www.googletagmanager.com; "
+            "object-src 'none'; base-uri 'self'; form-action 'self'"
+        )
         return response
 
 
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(SlowAPIMiddleware)
+
+
+async def _rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    from fastapi.responses import JSONResponse
+    return JSONResponse(status_code=429, content={"detail": "Too many requests. Please slow down."})
+
+
+app.add_exception_handler(RateLimitExceeded, _rate_limit_handler)
 
 # --- Static file serving for uploaded media ---
 app.mount("/api/media/files",
