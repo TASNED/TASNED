@@ -19,6 +19,9 @@ export default function Footer() {
             </span>
             <span className="font-bold text-2xl text-white tracking-tight">TASNED <span className="text-cyan">INTEGRATED</span></span>
           </div>
+          <div className="mt-1">
+            <div className="text-sm leading-none">تسنيد المتكاملة — تسنيد</div>
+          </div>
           <p className="mt-5 max-w-md text-sm leading-relaxed">{t.footer.about}</p>
           <p className="mt-4 text-base italic text-cyan/90 font-medium">{t.footer.disclaimer}</p>
           <div className="mt-6 flex gap-3">
