@@ -1129,7 +1129,7 @@ app.mount("/api/media/files",
           StaticFiles(directory=str((ROOT_DIR / "uploads" / "media"))),
           name="media_files")
 
-_cors = os.environ.get("CORS_ORIGINS", os.environ.get("FRONTEND_URL", "http://localhost:3000"))
+_cors = os.environ.get("CORS_ORIGINS", os.environ.get("FRONTEND_URL", "http://localhost:3000,https://www.tasned.sa,https://tasned.sa"))
 _origins = [o.strip() for o in _cors.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
