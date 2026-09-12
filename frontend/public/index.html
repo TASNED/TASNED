@@ -41,84 +41,51 @@
         <meta name="twitter:description" content="تسنيد المتكاملة لخدمات فحص مياه الموازنة والخدمات البحرية للسفن في المملكة العربية السعودية." />
         <meta name="twitter:image" content="https://www.tasned.sa/og-image.png" />
 
-        <!-- Organization JSON-LD -->
+        <!-- Structured Data (Combined Schema) -->
         <script type="application/ld+json">
         {
             "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "تسنيد المتكاملة",
-            "alternateName": ["TASNED Integrated", "تسنيد", "TASNED"],
-            "url": "https://www.tasned.sa/",
-            "logo": "https://www.tasned.sa/tasned-logo.png",
-            "image": "https://www.tasned.sa/og-image.png",
-            "description": "شركة تسنيد المتكاملة للخدمات البحرية المتخصصة في فحص مياه الموازنة والاختبارات البيئية للسفن في السعودية.",
-            "email": "info@tasned.sa",
-            "address": {
-                "@type": "PostalAddress",
-                "addressCountry": "SA",
-                "addressRegion": "Kingdom of Saudi Arabia"
-            },
-            "areaServed": {
-                "@type": "Country",
-                "name": "Saudi Arabia"
-            }
-        }
-        </script>
-
-        <!-- WebSite JSON-LD -->
-        <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "name": "تسنيد المتكاملة / TASNED INTEGRATED",
-            "alternateName": ["Tasned Integrated", "تسنيد", "TASNED"],
-            "url": "https://www.tasned.sa/",
-            "inLanguage": ["ar", "en"],
-            "publisher": {
-                "@type": "Organization",
-                "name": "تسنيد المتكاملة",
-                "url": "https://www.tasned.sa/"
-            }
-        }
-        </script>
-
-        <!-- Services JSON-LD -->
-        <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "Service",
-            "serviceType": "Ballast Water Testing & Marine Environmental Compliance",
-            "provider": {
-                "@type": "Organization",
-                "name": "تسنيد المتكاملة",
-                "url": "https://www.tasned.sa/"
-            },
-            "areaServed": {
-                "@type": "Country",
-                "name": "Saudi Arabia"
-            },
-            "hasOfferCatalog": {
-                "@type": "OfferCatalog",
-                "name": "الخدمات البحرية وفحص الموازنة",
-                "itemListElement": [
-                    {
-                        "@type": "Offer",
-                        "itemOffered": {
-                            "@type": "Service",
-                            "name": "Onboard Ballast Water Sampling & Testing",
-                            "description": "خدمات أخذ العينات واختبار مياه الموازنة على ظهر السفن وفق المعايير الدولية."
-                        }
+            "@graph": [
+                {
+                    "@type": "Organization",
+                    "name": "تسنيد المتكاملة",
+                    "alternateName": ["TASNED Integrated", "تسنيد", "TASNED"],
+                    "url": "https://www.tasned.sa/",
+                    "logo": "https://www.tasned.sa/tasned-logo.png",
+                    "image": "https://www.tasned.sa/og-image.png",
+                    "description": "شركة تسنيد المتكاملة للخدمات البحرية المتخصصة في فحص مياه الموازنة والاختبارات البيئية للسفن في السعودية.",
+                    "email": "info@tasned.sa",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressCountry": "SA",
+                        "addressRegion": "Kingdom of Saudi Arabia"
                     },
-                    {
-                        "@type": "Offer",
-                        "itemOffered": {
-                            "@type": "Service",
-                            "name": "Environmental Compliance & Laboratory Analysis",
-                            "description": "التحليل المخبري والامتثال البيئي للموانئ والجهات التنظيمية."
-                        }
+                    "areaServed": {
+                        "@type": "Country",
+                        "name": "Saudi Arabia"
                     }
-                ]
-            }
+                },
+                {
+                    "@type": "WebSite",
+                    "name": "تسنيد المتكاملة / TASNED INTEGRATED",
+                    "alternateName": ["Tasned Integrated", "تسنيد", "TASNED"],
+                    "url": "https://www.tasned.sa/",
+                    "inLanguage": ["ar", "en"]
+                },
+                {
+                    "@type": "Service",
+                    "serviceType": "Ballast Water Testing & Marine Environmental Compliance",
+                    "provider": {
+                        "@type": "Organization",
+                        "name": "تسنيد المتكاملة",
+                        "url": "https://www.tasned.sa/"
+                    },
+                    "areaServed": {
+                        "@type": "Country",
+                        "name": "Saudi Arabia"
+                    }
+                }
+            ]
         }
         </script>
 
